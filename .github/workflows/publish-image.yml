@@ -1,0 +1,32 @@
+---
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: install buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
+      - name: build the image
+        run: |
+          docker buildx build \
+          --tag ganelson/vale-online-app:latest \
+          --platform linux/amd64,linux/arm64 \
+          .
+      - name: Push To quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ganelson/vale-online-app:latest
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+          registry: quay.io
+      - name: Print image url
+        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
