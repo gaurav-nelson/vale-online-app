@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Use Vale-at-Red-Hat online" />
+    <meta name="author" content="Gaurav Nelson" />
+    <title>Vale-at-Red-Hat online</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://code.getmdl.io/1.3.0/material.indigo-green.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"
+    />
+    <link rel="stylesheet" type="text/css" href="./app.css" />
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.2/codemirror.min.css"
+      integrity="sha512-xIf9AdJauwKIVtrVRZ0i4nHP61Ogx9fSRAkCLecmE2dL/U8ioWpDvFCAy4dcfecN72HHB9+7FfQj3aiO68aaaw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.62.2/theme/material.css"
+      integrity="sha256-zlIm5LpxT75HH4hqk0U/3lCJYJVCT5fNRypHPYKp9ik="
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header id="mainHeader" class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+          <span id="appHeader" class="mdl-layout-title"
+            >Vale-at-Red-Hat online</span
+          >
+          <div class="mdl-layout-spacer"></div>
+          <nav class="mdl-navigation">
+            <button
+              id="theme-toggle-button"
+              class="mdl-button mdl-js-button mdl-button--icon mdl-button--accent buttonMargin"
+              onclick="changeTheme()"
+            >
+              <i id="theme-toggle-icon" class="material-icons">dark_mode</i>
+            </button>
+            <button
+              id="clear-button"
+              onclick="clearEditor()"
+              class="mdl-button mdl-js-button mdl-button--accent mdl-js-ripple-effect buttonMargin"
+            >
+              Clear
+            </button>
+            <button
+              id="lint-button"
+              onclick="runValeLint()"
+              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+            >
+              Lint
+            </button>
+          </nav>
+        </div>
+      </header>
+      <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Settings</span>
+        <!-- <nav class="mdl-navigation">
+          <a class="mdl-navigation__link" href="https://github.com/redhat-documentation/vale-at-red-hat">GitHub</a>
+        </nav> -->
+        <ul class="settings-list mdl-list">
+          <li class="mdl-list__item">
+            <span class="mdl-list__item-primary-content">
+              <label
+                class="mdl-checkbox mdl-js-checkbox"
+                for="suggestionsCheckbox"
+              >
+                <input
+                  type="checkbox"
+                  id="suggestionsCheckbox"
+                  onclick="showHideSuggestions(this)"
+                  class="mdl-checkbox__input"
+                />
+                <span class="mdl-checkbox__label">Show suggestions</span>
+              </label>
+            </span>
+          </li>
+        </ul>
+      </div>
+      <main
+        class="mdl-layout__content"
+        ondrop="dropHandler(event);"
+        ondragover="dragOverHandler(event);"
+      >
+        <div class="mdl-grid">
+          <div class="mdl-cell mdl-cell--11-col" id="editor"></div>
+          <div class="mdl-cell mdl-cell--1-col" id="results">
+            <span class="mdl-chip mdl-chip--contact" id="warningChip">
+              <span
+                id="warningCount"
+                class="mdl-chip__contact mdl-color--yellow-700"
+                >0</span
+              >
+              <span class="mdl-chip__text">Warnings</span>
+            </span>
+            <span class="mdl-chip mdl-chip--contact" id="errorChip">
+              <span id="errorCount" class="mdl-chip__contact mdl-color--red-600"
+                >0</span
+              >
+              <span class="mdl-chip__text">Errors</span>
+            </span>
+            <span class="mdl-chip mdl-chip--contact" id="suggestionChip">
+              <span
+                id="suggestionCount"
+                class="mdl-chip__contact mdl-color--blue-600"
+                >0</span
+              >
+              <span class="mdl-chip__text">Suggestions</span>
+            </span>
+          </div>
+        </div>
+        <div id="cover"></div>
+        <div id="spinner" class="centered">
+          <div class="mdl-spinner mdl-js-spinner is-active"></div>
+        </div>
+        <div
+          id="notification-msg"
+          aria-live="assertive"
+          aria-atomic="true"
+          aria-relevant="text"
+          class="mdl-snackbar mdl-js-snackbar"
+        >
+          <div class="mdl-snackbar__text"></div>
+          <button type="button" class="mdl-snackbar__action"></button>
+        </div>
+      </main>
+    </div>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.2/codemirror.min.js"
+      integrity="sha512-6Q5cHfb86ZJ3qWx47Pw7P5CN1/pXcBMmz3G0bXLIQ67wOtRF7brCaK5QQLPz2CWLBqjWRNH+/bV5MwwWxFGxww=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/codemirror-asciidoc@1.0.4/lib/asciidoc.min.js"
+    ></script>
+    <script type="text/javascript" src="./placeholder.js"></script>
+    <script type="text/javascript" src="./app.js"></script>
+  </body>
+</html>
