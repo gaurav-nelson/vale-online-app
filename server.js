@@ -45,14 +45,54 @@ app.post("/", cors(corsOptions), async function (req, res) {
   }
 });
 
-// Define the URL of the file to download
-const fileUrl =
-  "https://raw.githubusercontent.com/openshift/openshift-docs/main/.vale.ini";
+const checkInternet = () => {
+  return fetch("http://google.com", { method: "HEAD" })
+    .then(() => true)
+    .catch(() => false);
+};
 
-// Define the path where the file will be saved
-const filePath = "./.vale.ini";
+const start = async () => {
+  const isConnected = await checkInternet();
+  if (isConnected) {
+    // Define the URL of the file to download
+    const fileUrl =
+      "https://raw.githubusercontent.com/openshift/openshift-docs/main/.vale.ini";
 
-console.log("⬇️ Downloading the .vale.ini file...");
+    // Define the path where the file will be saved
+    const filePath = "./.vale.ini";
+
+    console.log("⬇️ Downloading the .vale.ini file...");
+    fetch(fileUrl)
+      .then((res) => {
+        if (res.ok && res.body) {
+          let writer = fs.createWriteStream(filePath);
+          Readable.fromWeb(res.body).pipe(writer);
+          return new Promise((resolve, reject) => {
+            writer.on("finish", resolve);
+            writer.on("error", reject);
+          });
+        } else {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+      })
+      .then(() => {
+        console.log("📦 .vale.ini file downloaded!");
+        runValeSyncAndStartServer();
+      })
+      .catch((error) => {
+        console.error(
+          "❗ An error occurred while downloading the .vale.ini file. Using the default:",
+          error
+        );
+        runValeSyncAndStartServer();
+      });
+  } else {
+    console.log("❗ Cannot connect to internet. Using default .vale.ini file and rules v461.");
+    startServer();
+  }
+};
+
+start();
 
 const startServer = () => {
   // Start the server
@@ -95,28 +135,3 @@ const runValeSyncAndStartServer = () => {
     startServer();
   });
 };
-
-fetch(fileUrl)
-  .then((res) => {
-    if (res.ok && res.body) {
-      let writer = fs.createWriteStream(filePath);
-      Readable.fromWeb(res.body).pipe(writer);
-      return new Promise((resolve, reject) => {
-        writer.on("finish", resolve);
-        writer.on("error", reject);
-      });
-    } else {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-  })
-  .then(() => {
-    console.log("📦 .vale.ini file downloaded!");
-    runValeSyncAndStartServer();
-  })
-  .catch((error) => {
-    console.error(
-      "❗ An error occurred while downloading the .vale.ini file. Using the default:",
-      error
-    );
-    runValeSyncAndStartServer();
-  });
