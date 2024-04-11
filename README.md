@@ -4,11 +4,7 @@
 Simple web application to run Vale at Red Hat online app on a container locally.
 
 ## How to run
-1. Pull the image
-```bash
-docker pull quay.io/ganelson/vale-online-app
-```
-2. Run the container
+1. Run the following command to download the image and start the container:
 ```bash
 docker run --rm -p 8080:8080 quay.io/ganelson/vale-online-app
 ```
