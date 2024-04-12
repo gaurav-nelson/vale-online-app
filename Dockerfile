@@ -4,7 +4,7 @@ FROM node:21-alpine
 # Add the testing repository to install vale
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
 
-RUN apk update && apk add asciidoctor vale
+RUN apk update && apk add --no-cache asciidoctor vale
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
@@ -16,8 +16,7 @@ COPY package*.json ./
 
 # Install production dependencies.
 # If you add a package-lock.json, speed your build by switching to 'npm ci'.
-# RUN npm ci --only=production
-RUN npm install --only=production
+RUN npm ci --only=production
 
 # Copy local code to the container image.
 COPY . ./

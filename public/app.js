@@ -63,23 +63,31 @@ async function postData(url, data) {
 
 function sendRequest(adoc) {
   //console.log("REQ DATA: ", JSON.stringify(adoc));
-  postData(
-    "http://localhost:8080/",
-    JSON.stringify(adoc)
-  ).then((data) => {
-    loadingSpinner.style.display = "none";
-    cover.style.display = "none";
-    document.body.style.cursor = "default";
-    document.getElementById("lint-button").removeAttribute("disabled");
-    //console.log("RES DATA: ", data);
-    if (!Object.keys(data).length) {
-      //console.log("Response data: ", data);
-      showNotification("Hooray, no errors!");
-    } else {
-      highlightResults(data["stdin.adoc"]);
-      updateCounts();
-    }
-  });
+  postData("http://localhost:8080/", JSON.stringify(adoc))
+    .then((data) => {
+      loadingSpinner.style.display = "none";
+      cover.style.display = "none";
+      document.body.style.cursor = "default";
+      document.getElementById("lint-button").removeAttribute("disabled");
+      //console.log("RES DATA: ", data);
+      if (!Object.keys(data).length) {
+        //console.log("Response data: ", data);
+        showNotification("Hooray, no errors!");
+      } else {
+        highlightResults(data["stdin.adoc"]);
+        updateCounts();
+      }
+    })
+    .catch((error) => {
+      loadingSpinner.style.display = "none";
+      cover.style.display = "none";
+      document.body.style.cursor = "default";
+      document.getElementById("lint-button").removeAttribute("disabled");
+      console.error("ERROR:", error);
+      showNotification(
+        "ERROR: Please check your terminal."
+      );
+    });
 }
 
 function clearEditor() {
@@ -239,7 +247,10 @@ function highlightResults(data) {
       msg.className = "valeWarningMessage";
       widgetsWarning.push(editor.getDoc().addLineWidget(lineNumber, msg));
     }
-    if (data[i].Severity === "suggestion" && document.getElementById("suggestionsCheckbox").checked) {
+    if (
+      data[i].Severity === "suggestion" &&
+      document.getElementById("suggestionsCheckbox").checked
+    ) {
       var lineNumber = data[i].Line - 1;
       var startChar = data[i].Span[0] - 1;
       var endChar = data[i].Span[1];
@@ -280,13 +291,14 @@ function highlightResults(data) {
 function updateCounts() {
   document.getElementById("errorCount").textContent = widgetsError.length;
   document.getElementById("warningCount").textContent = widgetsWarning.length;
-  document.getElementById("suggestionCount").textContent = widgetsSuggestion.length;
+  document.getElementById("suggestionCount").textContent =
+    widgetsSuggestion.length;
   document.getElementById("results").style.display = "block";
   if (!document.getElementById("suggestionsCheckbox").checked) {
-  //hide the suggestion chip
+    //hide the suggestion chip
     document.getElementById("suggestionChip").style.display = "none";
   } else {
-  //show the suggestion chip
+    //show the suggestion chip
     document.getElementById("suggestionChip").style.display = "block";
   }
 }
@@ -307,8 +319,7 @@ window.addEventListener(
     if (this.window.innerWidth < 500) {
       document.getElementById("appHeader").innerHTML = "SFO";
     } else {
-      document.getElementById("appHeader").innerHTML =
-        "Vale-at-Red-Hat online";
+      document.getElementById("appHeader").innerHTML = "Vale-at-Red-Hat online";
     }
   },
   true
@@ -367,7 +378,7 @@ function showNotification(msg) {
   });
 }
 
-function showHideSuggestions(suggestionsCheckbox){
+function showHideSuggestions(suggestionsCheckbox) {
   //if checked, turn on suggestions and save to local storage
   if (suggestionsCheckbox.checked) {
     localStorage.setItem("showSuggestions", "on");
@@ -377,5 +388,5 @@ function showHideSuggestions(suggestionsCheckbox){
 }
 
 function closeNotification() {
-  document.getElementById('notificationBanner').style.display = 'none';
+  document.getElementById("notificationBanner").style.display = "none";
 }
