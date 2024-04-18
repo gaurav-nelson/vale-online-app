@@ -92,7 +92,7 @@ start();
 
 const startServer = () => {
   // Start the server
-  const server = app.listen(port, () => {
+  const server = app.listen(port, '0.0.0.0', () => {
     console.log(
       `🚀 Vale-at-Red-Hat web app is running at http://localhost:${port}`
     );
