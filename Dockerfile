@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.19
 
 RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >>/etc/apk/repositories
 
@@ -16,5 +16,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY . ./
+
+EXPOSE 8080
 
 CMD [ "node", "server.js" ]
