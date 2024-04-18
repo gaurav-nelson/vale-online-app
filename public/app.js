@@ -63,7 +63,7 @@ async function postData(url, data) {
 
 function sendRequest(adoc) {
   //console.log("REQ DATA: ", JSON.stringify(adoc));
-  postData("http://localhost:8080/", JSON.stringify(adoc))
+  postData("/", JSON.stringify(adoc))
     .then((data) => {
       loadingSpinner.style.display = "none";
       cover.style.display = "none";
