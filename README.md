@@ -11,3 +11,11 @@ docker pull quay.io/ganelson/vale-online-app && docker run --rm -p 8080:8080 qua
 2. Open your browser and go to `http://localhost:8080`
 3. Paste the content you want to check in the text area and click on the `Lint` button.
 4. To close the app, press `Ctrl+C` in the terminal where the container is running.
+
+## Using custom Vale configuration
+If you want to use a custom Vale configuration, you can mount a volume with the configuration file and specify the `VALE_INI_PATH` environment variable.
+
+For example, if you have a `.vale.ini` file in the current directory, you can run the following command:
+```bash
+docker run --rm -p 8080:8080 -v $(pwd)/.vale.ini:/app/config/user.ini -e VALE_INI_PATH=/app/config/user.ini quay.io/ganelson/vale-online-app
+```
