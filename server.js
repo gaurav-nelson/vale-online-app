@@ -4,6 +4,7 @@ const cors = require("cors");
 const port = 8080;
 const { spawn } = require("child_process");
 const fs = require("fs");
+const path = require("path");
 const downloadFiles = require("./download-files");
 
 const regex = /(ifdef::).*|(ifndef::).*|(endif::).*|(ifeval::).*|(\/\/).*/g;
@@ -66,23 +67,43 @@ const checkInternet = () => {
 
 const start = async () => {
   const isConnected = await checkInternet();
+  const valeIniPath = process.env.VALE_INI_PATH;
+
+  let customIniProvided = false;
+
+  if (valeIniPath && path.extname(valeIniPath) === ".ini") {
+    try {
+      const iniContent = await fs.promises.readFile(valeIniPath, "utf8");
+      await fs.promises.writeFile(".vale.ini", iniContent);
+      console.log("ℹ️ Using custom .vale.ini file.");
+      customIniProvided = true;
+    } catch (err) {
+      console.error("❗ Error using custom .vale.ini file, using the default: ", err);
+    }
+  }
+
   if (isConnected) {
-    console.log("⬇️ Downloading the configuration files...");
-    downloadFiles()
-      .then(() => {
-        console.log("📦 Files downloaded!");
-        runValeSyncAndStartServer();
-      })
-      .catch((error) => {
-        console.error(
-          "❗ An error occurred while downloading the files. Using the default:",
-          error
-        );
-        runValeSyncAndStartServer();
-      });
+    if (!customIniProvided) {
+      console.log("ℹ️ Using default .vale.ini file.");
+      console.log("⬇️ Downloading the configuration files...");
+      downloadFiles()
+        .then(() => {
+          console.log("📦 Files downloaded!");
+          runValeSyncAndStartServer();
+        })
+        .catch((error) => {
+          console.error(
+            "❗ An error occurred while downloading the files. Using the default: ",
+            error
+          );
+          runValeSyncAndStartServer();
+        });
+    } else {
+      runValeSyncAndStartServer();
+    }
   } else {
     console.log(
-      "❗ Cannot connect to internet. Using default files and rules v461."
+      "❗ Cannot connect to internet. Using default files and Vale at Red Hat rules v562."
     );
     startServer();
   }

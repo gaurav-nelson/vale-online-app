@@ -1,7 +1,7 @@
 {
-  "name": "studious-fortnight-online",
-  "version": "1.0.0",
-  "description": "Run vale lint online based on studious-fortnight rules",
+  "name": "vale-online-app",
+  "version": "1.0.9",
+  "description": "Run vale lint online based on https://github.com/redhat-documentation/vale-at-red-hat rules.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +10,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.21.0"
   }
 }
