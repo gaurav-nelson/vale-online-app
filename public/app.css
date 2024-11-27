@@ -70,6 +70,10 @@ body {
   margin-right: 20px;
 }
 
+#github-button {
+  margin-left: 20px;
+}
+
 .centered {
   position: fixed;
   top: 50%;

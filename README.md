@@ -1,6 +1,6 @@
 ![Demo](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYThucGZlZncwbGE0dGN6MW4yZmt3dTJ2YWRreHp2MW50amJ1ZTBrayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/v8twgFNMaK511l844i/source.gif)
 
-# Vale at Red Hat web app
+# Vale at Red Hat online app
 Simple web application to run Vale at Red Hat online app on a container locally.
 
 ## How to run
@@ -19,3 +19,12 @@ For example, if you have a `.vale.ini` file in the current directory, you can ru
 ```bash
 docker run --rm -p 8080:8080 -v $(pwd)/.vale.ini:/app/config/user.ini -e VALE_INI_PATH=/app/config/user.ini quay.io/ganelson/vale-online-app
 ```
+
+## Known Issues
+
+### Vale at Red Hat online app fails to load in Chrome on Fedora Linux 41
+
+The Vale at Red Hat online app might fail to load on Google Chrome. See https://github.com/gaurav-nelson/vale-online-app/issues/2 for more information.
+
+**Workaround:**
+Use Firefox to access the Vale at Red Hat online app on Fedora Linux 41 as a temporary workaround.

@@ -11,7 +11,7 @@ COPY . ./
 
 FROM alpine:3.20
 
-RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/testing >>/etc/apk/repositories
+RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >>/etc/apk/repositories
 
 # gem install uri is a vulnerability fix
 RUN apk update && \
@@ -23,6 +23,9 @@ RUN apk update && \
 WORKDIR /usr/src/app
 
 COPY --from=build /usr/src/app /usr/src/app
+
+ENV VALE_INI_PATH=/app/config/user.ini
+ENV PORT=8080
 
 EXPOSE 8080
 
