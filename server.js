@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const port = 8080;
 const { spawn } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const downloadFiles = require("./download-files");
+const { validateInput, handleError, log } = require("./utils");
 
+const port = process.env.PORT || 8080;
 const regex = /(ifdef::).*|(ifndef::).*|(endif::).*|(ifeval::).*|(\/\/).*/g;
 
 app.use(express.json());
@@ -15,54 +16,56 @@ const corsOptions = {
   origin: function (origin, callback) {
     callback(null, true);
   },
-  optionsSuccessStatus: 200, // For legacy browser support
+  optionsSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions)); // Enables CORS for all routes
+app.use(cors(corsOptions));
 app.use(express.static("public"));
 
 app.post("/", cors(corsOptions), async function (req, res) {
   const reqData = req.body;
-  if (reqData.textarea === null || reqData.textarea === "") {
-    res.status(401).send({ error: true, msg: "Missing data!" });
-  } else {
-    const asciidocString = reqData.textarea.replace(regex, " ");
-    try {
-      await fs.promises.writeFile("stdin.adoc", asciidocString);
-      const valeLint = spawn("vale", ["--output=JSON", "stdin.adoc"]);
-      let output = "";
-      let responseSent = false;
-      valeLint.stdout.setEncoding("utf8");
-      valeLint.stdout.on("data", (data) => {
-        output += `${data}`;
-      });
-      valeLint.on("error", (error) => {
-        console.error("Error running Vale: ", error);
-        if (!responseSent) {
-          responseSent = true;
-          res.status(500).send({ error: true, msg: "Internal server error!" });
-        }
-      });
-      valeLint.on("close", (code) => {
-        if (!responseSent) {
-          responseSent = true;
-          res.send(output);
-        }
-      });
-    } catch (err) {
-      console.error("WRITEFILE: ", err);
-      if (!responseSent) {
-        responseSent = true;
-        res.status(500).send({ error: true, msg: "Internal server error!" });
-      }
-    }
+  if (!validateInput(reqData.textarea)) {
+    return res.status(401).send({ error: true, msg: "Missing or invalid data!" });
+  }
+
+  const asciidocString = reqData.textarea.replace(regex, " ");
+  try {
+    await fs.promises.writeFile("stdin.adoc", asciidocString);
+    const output = await runVale("stdin.adoc");
+    res.send(output);
+  } catch (err) {
+    handleError(res, err, "Internal server error!");
   }
 });
 
-const checkInternet = () => {
-  return fetch("http://google.com", { method: "HEAD" })
-    .then(() => true)
-    .catch(() => false);
+const runVale = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const valeLint = spawn("vale", ["--output=JSON", filePath]);
+    let output = "";
+
+    valeLint.stdout.setEncoding("utf8");
+    valeLint.stdout.on("data", (data) => {
+      output += data;
+    });
+
+    valeLint.on("error", (error) => {
+      log("Error running Vale: ", error);
+      reject(error);
+    });
+
+    valeLint.on("close", (code) => {
+      resolve(output);
+    });
+  });
+};
+
+const checkInternet = async () => {
+  try {
+    await fetch("http://google.com", { method: "HEAD" });
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 const start = async () => {
@@ -75,80 +78,76 @@ const start = async () => {
     try {
       const iniContent = await fs.promises.readFile(valeIniPath, "utf8");
       await fs.promises.writeFile(".vale.ini", iniContent);
-      console.log("ℹ️ Using custom .vale.ini file.");
+      log("ℹ️ Using custom .vale.ini file.");
       customIniProvided = true;
     } catch (err) {
-      console.error("❗ Error using custom .vale.ini file, using the default: ", err);
+      log("❗ Error using custom .vale.ini file, using the default: ", err);
     }
   }
 
   if (isConnected) {
     if (!customIniProvided) {
-      console.log("ℹ️ Using default .vale.ini file.");
-      console.log("⬇️ Downloading the configuration files...");
-      downloadFiles()
-        .then(() => {
-          console.log("📦 Files downloaded!");
-          runValeSyncAndStartServer();
-        })
-        .catch((error) => {
-          console.error(
-            "❗ An error occurred while downloading the files. Using the default: ",
-            error
-          );
-          runValeSyncAndStartServer();
-        });
-    } else {
-      runValeSyncAndStartServer();
+      log("ℹ️ Using default .vale.ini file.");
+      log("⬇️ Downloading the configuration files...");
+      try {
+        await downloadFiles();
+        log("📦 Files downloaded!");
+      } catch (error) {
+        log("❗ An error occurred while downloading the files. Using the default: ", error);
+      }
     }
+    await runValeSyncAndStartServer();
   } else {
-    console.log(
-      "❗ Cannot connect to internet. Using default files and Vale at Red Hat rules v562."
-    );
+    log("❗ Cannot connect to internet. Using default files and Vale at Red Hat rules v562.");
     startServer();
   }
 };
 
-start();
+const runValeSyncAndStartServer = async () => {
+  log("� Running vale sync...");
+  try {
+    await runValeSync();
+    log("✅ Vale sync completed.");
+  } catch (error) {
+    log("❗ Vale sync process failed, using the default rules.");
+  }
+  startServer();
+};
+
+const runValeSync = () => {
+  return new Promise((resolve, reject) => {
+    const valeSync = spawn("vale", ["sync"]);
+
+    valeSync.stdout.on("data", (data) => {
+      log(`📦 ${data}`);
+    });
+
+    valeSync.stderr.on("data", (data) => {
+      log(`📤 stderr: ${data}`);
+    });
+
+    valeSync.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`Vale sync process exited with code ${code}`));
+      } else {
+        resolve();
+      }
+    });
+  });
+};
 
 const startServer = () => {
-  // Start the server
   const server = app.listen(port, '0.0.0.0', () => {
-    console.log(
-      `🚀 Vale-at-Red-Hat web app is running at http://localhost:${port}`
-    );
+    log(`🚀 Vale-at-Red-Hat web app is running at http://localhost:${port}`);
   });
 
-  process.on("SIGINT", function () {
-    console.log("\n🛑 Shutting down (Ctrl+C)");
+  process.on("SIGINT", () => {
+    log("\n🛑 Shutting down (Ctrl+C)");
     server.close(() => {
-      console.log("🔒 Server closed");
+      log("🔒 Server closed");
       process.exit();
     });
   });
 };
 
-const runValeSyncAndStartServer = () => {
-  // Now you can run the vale sync command
-  console.log("🔄 Running vale sync...");
-  const valeSync = spawn("vale", ["sync"]);
-
-  valeSync.stdout.on("data", (data) => {
-    console.log(`📦 ${data}`);
-  });
-
-  valeSync.stderr.on("data", (data) => {
-    console.error(`📤 stderr: ${data}`);
-  });
-
-  valeSync.on("close", (code) => {
-    if (code !== 0) {
-      console.log(
-        `❗ Vale sync process exited with code ${code}. Sync failed, using the default rules.`
-      );
-    } else {
-      console.log("✅ Vale sync completed.");
-    }
-    startServer();
-  });
-};
+start();
