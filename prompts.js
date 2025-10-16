@@ -25,10 +25,11 @@ Return ONLY the corrected text without any explanations, comments, or additional
  * @param {string} paragraph - The full paragraph containing the issue
  * @param {object} issue - The Vale issue object with Check, Message, Line, Span, Severity
  * @param {string} problematicText - The specific text that has the issue
+ * @param {string} additionalContext - Optional additional context from the user
  * @returns {string} - The complete prompt for the AI
  */
-function createFixPrompt(paragraph, issue, problematicText) {
-  return `${SYSTEM_PROMPT}
+function createFixPrompt(paragraph, issue, problematicText, additionalContext = '') {
+  let prompt = `${SYSTEM_PROMPT}
 
 Context paragraph:
 """
@@ -39,9 +40,21 @@ Issue to fix:
 - Rule: ${issue.Check}
 - Severity: ${issue.Severity}
 - Problem: ${issue.Message}
-- Problematic text: "${problematicText}"
+- Problematic text: "${problematicText}"`;
+
+  // Add additional context if provided
+  if (additionalContext && additionalContext.trim()) {
+    prompt += `
+
+Additional context from user:
+${additionalContext.trim()}`;
+  }
+
+  prompt += `
 
 Please rewrite the entire paragraph above to fix this issue. Maintain the technical accuracy and meaning, only change what's necessary to address the style/grammar issue. Return only the corrected paragraph text.`;
+
+  return prompt;
 }
 
 module.exports = {

@@ -48,6 +48,9 @@ function showAIFixModal() {
     issuesList.appendChild(noIssuesMsg);
   }
   
+  // Reset the filter dropdown to "None" to match the unchecked default state
+  document.getElementById("issue-filter-select").value = "none";
+  
   document.getElementById("ai-fix-modal").style.display = "flex";
   document.getElementById("ai-fix-loading").style.display = "none";
   document.getElementById("fix-issues-btn").disabled = false;
@@ -128,7 +131,7 @@ function createIssueElement(issue, index) {
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.id = `issue-${index}`;
-  checkbox.checked = true;
+  checkbox.checked = false;
   
   const label = document.createElement("label");
   label.htmlFor = `issue-${index}`;

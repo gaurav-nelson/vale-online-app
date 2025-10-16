@@ -103,14 +103,14 @@ app.get("/api/ollama/models", cors(corsOptions), async function (req, res) {
 });
 
 app.post("/api/ollama/fix", cors(corsOptions), async function (req, res) {
-  const { paragraph, issue, problematicText, model } = req.body;
+  const { paragraph, issue, problematicText, model, additionalContext } = req.body;
 
   if (!paragraph || !issue || !model) {
     return res.status(400).send({ error: true, msg: "Missing required parameters" });
   }
 
   try {
-    const prompt = createFixPrompt(paragraph, issue, problematicText);
+    const prompt = createFixPrompt(paragraph, issue, problematicText, additionalContext);
 
     const ollamaResponse = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: "POST",
