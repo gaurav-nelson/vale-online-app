@@ -208,9 +208,9 @@ body {
 .ai-modal-content {
   background-color: white;
   border-radius: 4px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 80vh;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -507,8 +507,9 @@ body {
 .approval-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 20px;
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -543,8 +544,12 @@ body {
   font-size: 0.9rem;
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   overflow-y: auto;
-  max-height: 300px;
+  overflow-x: hidden;
+  max-height: 400px;
+  min-height: 200px;
   margin: 0;
   line-height: 1.5;
 }
@@ -560,7 +565,6 @@ body {
 }
 
 .comparison-text-editable {
-  min-height: 150px;
   cursor: text;
 }
 

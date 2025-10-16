@@ -1,5 +1,13 @@
 // AI Fix Workflow - Issue processing and approval
 
+function cleanAIOutput(originalText, aiSuggestion) {
+  // If the original text doesn't contain triple quotes, remove them from the AI suggestion
+  if (!originalText.includes('"""')) {
+    return aiSuggestion.replace(/"""/g, '');
+  }
+  return aiSuggestion;
+}
+
 function extractParagraph(text, lineNumber) {
   const lines = text.split("\n");
   let startLine = lineNumber;
@@ -73,10 +81,10 @@ async function processCurrentIssue() {
     }
     
     const data = await response.json();
-    currentFixedText = data.fixedText;
+    currentFixedText = cleanAIOutput(paragraph, data.fixedText);
     
     // Show approval view
-    showApprovalView(issue, paragraph, data.fixedText);
+    showApprovalView(issue, paragraph, currentFixedText);
     
   } catch (error) {
     console.error(`Error processing issue ${currentIssueIndex + 1}:`, error);
@@ -259,9 +267,9 @@ async function retryCurrentFix() {
     }
     
     const data = await response.json();
-    currentFixedText = data.fixedText;
+    currentFixedText = cleanAIOutput(currentOriginalText, data.fixedText);
     
-    showApprovalView(currentIssue, currentOriginalText, data.fixedText);
+    showApprovalView(currentIssue, currentOriginalText, currentFixedText);
     
   } catch (error) {
     console.error("Error retrying fix:", error);
