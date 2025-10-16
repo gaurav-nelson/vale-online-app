@@ -1,7 +1,7 @@
 ---
 extends: substitution
 ignorecase: false
-level: error
+level: warning
 link: https://redhat-documentation.github.io/vale-at-red-hat/docs/main/reference-guide/casesensitiveterms/
 message: "Use '%s' rather than '%s'."
 action:
@@ -11,6 +11,7 @@ swap:
   "(?<!/)var": VAR
   "(?<!Business )Resource Planner|(?<!Business Resource )Planner": Business Resource Planner
   "(?<!Microsoft Azure )On-Demand Marketplace": Microsoft Azure On-Demand Marketplace
+  "(?<!Red Hat )Advanced Cluster Management|(?<!Red Hat )Advanced Cluster Management for Kubernetes|ACM|ACMK": Red Hat Advanced Cluster Management for Kubernetes
   "(?<!Red Hat )JBoss Enterprise Application Platform": Red Hat JBoss Enterprise Application Platform
   "(?<!Red Hat )OpenStack Platform|RHOS|RH-OSP": Red Hat OpenStack Platform
   "(?<!Red Hat JBoss )BRMS(?! engine)": inference engine
@@ -32,7 +33,7 @@ swap:
   '(?<!JBoss )EAP|(?<!Red Hat )JBoss(?!\sCommunity|\sBroker|\sClients|\sConsole|\sAMQ|\sData\sGrid|\sBRMS|\sBPMS|\sEnterprise\sApplication\sPlatform|\.org|\sInterconnect|\sEAP|\sBPM\sSuite)': JBoss EAP
   '(?<!Realtime )Decision\sServer': Realtime Decision Server
   '[nN]odejs|[nN]ode\.JS|node\.js': Node.js
-  'dotNet': .NET
+  '\b(NVidia|N-Vidia|Nvidia|nVIDIA|nvidia[^\/])\b': NVIDIA
   'A-MQ(?!\sBroker|\sClient|\sConsole|\sInterconnect)': AMQ
   'A-MQ\sBroker': AMQ Broker
   'A-MQ\sClients': AMQ Clients
@@ -42,6 +43,7 @@ swap:
   'ActiveMQ\sArtemis|ActiveMQ(?!\sArtemis)': built-in messaging|JBoss EAP built-in messaging|JBoss EAP messaging
   'Admin\sPortal|webadmin\sportal|webadmin|Administrator\sPortal|Administration\sportal': Administration Portal
   'BRMS\sengine': inference engine
+  'dotNet': .NET
   'GUI\seditor|Business\sCentral\seditor': guided editor
   'JBoss\.org': JBoss Community
   'JBoss\sAMQ': AMQ
@@ -116,6 +118,7 @@ swap:
   Faq|faq|F.A.Q: FAQ
   fault tolerant: fault-tolerant
   fault-tolerance: fault tolerance
+  fbc|Fbc|FBC: file-based catalog
   fedora project: Fedora™ Project
   filestore|File Store: FileStore
   Firewalld|firewallD|FirewallD: firewalld
@@ -177,11 +180,12 @@ swap:
   knowledgebase: Knowledgebase
   ksession|knowledge session: KIE session
   Kubelet(?! Stats Receiver): kubelet
-  kubernetes|k8s: Kubernetes
+  kubernetes: Kubernetes
   kvm: KVM
   Lan|lan: LAN
   Librados|LIBRADOS: librados
   Librbd|LIBRBD: librbd
+  Lightspeed|LightSpeed: Red Hat Ansible Lightspeed|Red Hat Enterprise Linux Lightspeed
   Lightweight Directory Access Protocol over Secure Socket Layer: LDAPS
   LINUX|linux: Linux
   live-backup group: master-slave group
@@ -203,9 +207,11 @@ swap:
   network interface card: network interface controller (NIC)
   objectclass: objectClass
   Objective-C: Objective C
+  oci|Oci: OCI
   OCP: Red Hat OpenShift Container Platform
   ODF: Red Hat OpenShift Data Foundation
   OK button|okay|ok: OK
+  open container initiative|Open container initiative: Open Container Initiative
   Open InfiniBand|Infiniband: InfiniBand
   Open Telemetry: OpenTelemetry (OTel)
   openid connect|Openid Connect: OpenID Connect

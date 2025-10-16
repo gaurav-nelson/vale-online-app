@@ -76,12 +76,15 @@ const start = async () => {
 
   if (valeIniPath && path.extname(valeIniPath) === ".ini") {
     try {
+      await fs.promises.access(valeIniPath, fs.constants.F_OK);
       const iniContent = await fs.promises.readFile(valeIniPath, "utf8");
       await fs.promises.writeFile(".vale.ini", iniContent);
       log("ℹ️ Using custom .vale.ini file.");
       customIniProvided = true;
     } catch (err) {
-      log("❗ Error using custom .vale.ini file, using the default: ", err);
+      if (err.code !== "ENOENT") {
+        log("❗ Error using custom .vale.ini file, using the default: ", err);
+      }
     }
   }
 

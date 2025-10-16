@@ -1,6 +1,6 @@
 {
   "name": "vale-online-app",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Run vale lint online based on https://github.com/redhat-documentation/vale-at-red-hat rules.",
   "main": "server.js",
   "scripts": {
@@ -10,6 +10,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.0"
+    "express": "^5.1.0"
   }
 }
