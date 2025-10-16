@@ -30,6 +30,8 @@ function sendRequest(adoc) {
         //console.log("Response data: ", data);
         showNotification("Hooray, no errors!");
       } else {
+        // Store full Vale response data including Action fields
+        valeIssuesData = data["stdin.adoc"] || [];
         highlightResults(data["stdin.adoc"]);
         updateCounts();
       }
@@ -60,6 +62,7 @@ function clearCountsMarksWidgets() {
   widgetsError = [];
   widgetsWarning = [];
   widgetsSuggestion = [];
+  valeIssuesData = [];
   document.getElementById("errorCount").textContent = "0";
   document.getElementById("warningCount").textContent = "0";
   document.getElementById("suggestionCount").textContent = "0";

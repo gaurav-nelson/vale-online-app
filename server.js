@@ -104,14 +104,14 @@ app.get("/api/ollama/models", cors(corsOptions), async function (req, res) {
 
 app.post("/api/ollama/fix", cors(corsOptions), async function (req, res) {
   const { paragraph, issue, problematicText, model } = req.body;
-  
+
   if (!paragraph || !issue || !model) {
     return res.status(400).send({ error: true, msg: "Missing required parameters" });
   }
 
   try {
     const prompt = createFixPrompt(paragraph, issue, problematicText);
-    
+
     const ollamaResponse = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: "POST",
       headers: {
@@ -214,11 +214,11 @@ const runValeSync = () => {
 const startServer = async () => {
   const server = app.listen(port, '0.0.0.0', async () => {
     log(`🚀 Vale-at-Red-Hat web app is running at http://localhost:${port}`);
-    
+
     // Check if Ollama is available
     try {
-      const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, { 
-        signal: AbortSignal.timeout(3000) 
+      const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
+        signal: AbortSignal.timeout(3000)
       });
       if (response.ok) {
         log(`🤖 Ollama integration available at ${OLLAMA_BASE_URL}`);
