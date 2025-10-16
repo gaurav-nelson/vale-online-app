@@ -42,9 +42,10 @@
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <header id="mainHeader" class="mdl-layout__header">
         <div class="mdl-layout__header-row">
-          <span id="appHeader" class="mdl-layout-title"
-            >Vale-at-Red-Hat online</span
-          >
+          <a href="https://github.com/gaurav-nelson/vale-online-app" target="_blank" class="app-branding">
+            <img src="./github-mark-white.svg" alt="GitHub" class="github-icon-left">
+            <span id="appHeader" class="mdl-layout-title">Vale-at-Red-Hat online</span>
+          </a>
           <div class="mdl-layout-spacer"></div>
           <nav class="mdl-navigation">
             <button
@@ -71,52 +72,21 @@
             <button
               id="ai-fix-button"
               onclick="showAIFixModal()"
-              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect ai-fix-btn"
+              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect ai-fix-btn mdl-button--accent"
               style="display: none;"
             >
               Fix issues with AI
             </button>
             <button
-              id="github-button"
-              onclick="window.open('https://github.com/gaurav-nelson/vale-online-app', '_blank')"
-              class="mdl-button mdl-js-button mdl-button--accent mdl-js-ripple-effect buttonMargin">
-              <img src="./github-mark-white.svg" alt="GitHub" style="width:24px; height:24px;">
+              id="settings-button"
+              onclick="openSettingsModal()"
+              class="mdl-button mdl-js-button mdl-button--icon mdl-button--accent"
+            >
+              <i class="material-icons">settings</i>
             </button>
           </nav>
         </div>
       </header>
-      <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title">Settings</span>
-        <!-- <nav class="mdl-navigation">
-          <a class="mdl-navigation__link" href="https://github.com/redhat-documentation/vale-at-red-hat">GitHub</a>
-        </nav> -->
-        <ul class="settings-list mdl-list">
-          <li class="mdl-list__item">
-            <span class="mdl-list__item-primary-content">
-              <label
-                class="mdl-checkbox mdl-js-checkbox"
-                for="suggestionsCheckbox"
-              >
-                <input
-                  type="checkbox"
-                  id="suggestionsCheckbox"
-                  onclick="showHideSuggestions(this)"
-                  class="mdl-checkbox__input"
-                />
-                <span class="mdl-checkbox__label">Show suggestions</span>
-              </label>
-            </span>
-          </li>
-          <li class="mdl-list__item" id="model-selection-container" style="display: none;">
-            <span class="mdl-list__item-primary-content">
-              <label for="ollamaModelSelect" style="display: block; margin-bottom: 8px;">AI Model</label>
-              <select id="ollamaModelSelect" class="model-select" onchange="saveSelectedModel(this)">
-                <option value="">Loading models...</option>
-              </select>
-            </span>
-          </li>
-        </ul>
-      </div>
       <main
         class="mdl-layout__content"
         ondrop="dropHandler(event);"
@@ -254,6 +224,40 @@
           </button>
           <button onclick="applyApprovedFixes()" id="apply-fixes-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" style="display: none;">
             Apply Changes
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="ai-modal" style="display: none;">
+      <div class="ai-modal-content settings-modal-content">
+        <div class="ai-modal-header">
+          <h4>Settings</h4>
+          <button class="ai-modal-close" onclick="closeSettingsModal()">&times;</button>
+        </div>
+        <div class="ai-modal-body">
+          <div class="settings-option">
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="suggestionsCheckbox">
+              <input
+                type="checkbox"
+                id="suggestionsCheckbox"
+                onclick="showHideSuggestions(this)"
+                class="mdl-checkbox__input"
+              />
+              <span class="mdl-checkbox__label">Show suggestions</span>
+            </label>
+          </div>
+          <div class="settings-option" id="model-selection-container" style="display: none;">
+            <label for="ollamaModelSelect" class="settings-label">OllamaAI Model</label>
+            <select id="ollamaModelSelect" class="model-select" onchange="saveSelectedModel(this)">
+              <option value="">Loading models...</option>
+            </select>
+          </div>
+        </div>
+        <div class="ai-modal-footer">
+          <button onclick="closeSettingsModal()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+            Close
           </button>
         </div>
       </div>

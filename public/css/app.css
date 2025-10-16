@@ -66,22 +66,52 @@ body {
   z-index: 999;
 }
 
+/* Header row padding */
+.mdl-layout__header-row {
+  padding-left: 20px !important;
+}
+
+/* Navigation button spacing */
+.mdl-navigation button {
+  margin-left: 12px;
+}
+
 .buttonMargin {
-  margin-right: 20px;
+  margin-right: 0;
+  margin-left: 12px;
 }
 
 /* AI Fix Button - Purple/Deep Purple theme */
 .ai-fix-btn {
-  background-color: #673ab7 !important;
-  color: white !important;
+  margin-left: 12px !important;
 }
 
-.ai-fix-btn:hover {
-  background-color: #5e35b1 !important;
+#settings-button {
+  margin-left: 12px;
 }
 
-#github-button {
-  margin-left: 20px;
+/* App branding with GitHub icon on left */
+.app-branding {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.app-branding:hover {
+  opacity: 0.8;
+}
+
+.github-icon-left {
+  width: 28px;
+  height: 28px;
+  margin-right: 12px;
+}
+
+.app-branding .mdl-layout-title {
+  margin: 0;
 }
 
 .centered {
@@ -624,4 +654,29 @@ body {
 
 .mdl-color--blue-grey-900 #summary-message {
   color: #b0bec5;
+}
+
+/* Settings Modal Styles */
+.settings-modal-content {
+  max-width: 500px;
+  max-height: 60vh;
+}
+
+.settings-option {
+  margin-bottom: 24px;
+}
+
+.settings-option:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .settings-label {
+  color: #eceff1;
 }

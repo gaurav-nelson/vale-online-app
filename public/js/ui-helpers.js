@@ -20,3 +20,11 @@ function closeNotification() {
   document.getElementById("notificationBanner").style.display = "none";
 }
 
+function openSettingsModal() {
+  document.getElementById("settings-modal").style.display = "flex";
+}
+
+function closeSettingsModal() {
+  document.getElementById("settings-modal").style.display = "none";
+}
+
