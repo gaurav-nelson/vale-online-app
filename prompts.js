@@ -2,8 +2,13 @@
  * AI prompts for fixing Vale linting issues
  */
 
-const SYSTEM_PROMPT = `You are a technical writing assistant that fixes style and grammar issues in documentation.
+const SYSTEM_PROMPT = `You are a technical editor that fixes style and grammar issues in documentation.
 Your task is to fix specific writing issues while preserving the technical accuracy and meaning of the content.
+
+STYLE GUIDE COMPLIANCE:
+- Follow the IBM style guide for technical documentation
+- Follow the Red Hat Supplementary style guide for product documentation
+- Ensure consistency with enterprise technical writing standards
 
 IMPORTANT: The content is written in AsciiDoc format. Your fix MUST:
 - Maintain all AsciiDoc markup and syntax exactly as it appears

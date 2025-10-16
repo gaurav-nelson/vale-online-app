@@ -58,6 +58,42 @@ body {
   color: black;
 }
 
+/* Inline Fix Button Styles */
+.inline-fix-button {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.inline-fix-button:hover {
+  background-color: #303f9f;
+}
+
+.inline-fix-button:active {
+  background-color: #1a237e;
+}
+
+.mdl-color--blue-grey-900 .inline-fix-button {
+  background-color: #7986cb;
+  color: #263238;
+}
+
+.mdl-color--blue-grey-900 .inline-fix-button:hover {
+  background-color: #5c6bc0;
+}
+
+.mdl-color--blue-grey-900 .inline-fix-button:active {
+  background-color: #3f51b5;
+}
+
 #results {
   display: none;
   position: fixed;
@@ -172,9 +208,9 @@ body {
 .ai-modal-content {
   background-color: white;
   border-radius: 4px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 80vh;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -471,8 +507,9 @@ body {
 .approval-comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 20px;
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -507,8 +544,12 @@ body {
   font-size: 0.9rem;
   white-space: pre-wrap;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   overflow-y: auto;
-  max-height: 300px;
+  overflow-x: hidden;
+  max-height: 400px;
+  min-height: 200px;
   margin: 0;
   line-height: 1.5;
 }
@@ -524,7 +565,6 @@ body {
 }
 
 .comparison-text-editable {
-  min-height: 150px;
   cursor: text;
 }
 

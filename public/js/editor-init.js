@@ -12,6 +12,7 @@ var ollamaAvailable = false;
 var ollamaModels = [];
 var selectedModel = null;
 var allIssues = []; // Store all issues from the last lint
+var valeIssuesData = []; // Store full Vale response data with Action fields
 
 // Approval workflow state
 var currentIssueIndex = 0;
