@@ -6,9 +6,15 @@ const fs = require("fs");
 const path = require("path");
 const downloadFiles = require("./download-files");
 const { validateInput, handleError, log } = require("./utils");
+const { createFixPrompt } = require("./prompts");
 
 const port = process.env.PORT || 8080;
 const regex = /(ifdef::).*|(ifndef::).*|(endif::).*|(ifeval::).*|(\/\/).*/g;
+
+// Ollama host configuration - use host.docker.internal for containers
+const OLLAMA_HOST = process.env.OLLAMA_HOST || "host.docker.internal";
+const OLLAMA_PORT = process.env.OLLAMA_PORT || "11434";
+const OLLAMA_BASE_URL = `http://${OLLAMA_HOST}:${OLLAMA_PORT}`;
 
 app.use(express.json());
 
@@ -67,6 +73,72 @@ const checkInternet = async () => {
     return false;
   }
 };
+
+// Ollama API endpoints
+app.get("/api/ollama/status", cors(corsOptions), async function (req, res) {
+  try {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
+    if (response.ok) {
+      res.send({ available: true });
+    } else {
+      res.send({ available: false });
+    }
+  } catch (error) {
+    res.send({ available: false });
+  }
+});
+
+app.get("/api/ollama/models", cors(corsOptions), async function (req, res) {
+  try {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`);
+    if (!response.ok) {
+      return res.status(503).send({ error: true, msg: "Ollama not available" });
+    }
+    const data = await response.json();
+    const models = data.models.map(model => model.name);
+    res.send({ models });
+  } catch (error) {
+    handleError(res, error, "Failed to fetch Ollama models");
+  }
+});
+
+app.post("/api/ollama/fix", cors(corsOptions), async function (req, res) {
+  const { paragraph, issue, problematicText, model } = req.body;
+  
+  if (!paragraph || !issue || !model) {
+    return res.status(400).send({ error: true, msg: "Missing required parameters" });
+  }
+
+  try {
+    const prompt = createFixPrompt(paragraph, issue, problematicText);
+    
+    const ollamaResponse = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: model,
+        prompt: prompt,
+        stream: false,
+      }),
+    });
+
+    if (!ollamaResponse.ok) {
+      return res.status(503).send({ error: true, msg: "Ollama API error" });
+    }
+
+    const data = await ollamaResponse.json();
+    const fixedText = data.response.trim();
+
+    res.send({
+      fixedText: fixedText,
+      originalText: paragraph,
+    });
+  } catch (error) {
+    handleError(res, error, "Failed to fix issue with AI");
+  }
+});
 
 const start = async () => {
   const isConnected = await checkInternet();
@@ -139,9 +211,21 @@ const runValeSync = () => {
   });
 };
 
-const startServer = () => {
-  const server = app.listen(port, '0.0.0.0', () => {
+const startServer = async () => {
+  const server = app.listen(port, '0.0.0.0', async () => {
     log(`🚀 Vale-at-Red-Hat web app is running at http://localhost:${port}`);
+    
+    // Check if Ollama is available
+    try {
+      const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, { 
+        signal: AbortSignal.timeout(3000) 
+      });
+      if (response.ok) {
+        log(`🤖 Ollama integration available at ${OLLAMA_BASE_URL}`);
+      }
+    } catch (error) {
+      // Ollama not available, don't log anything
+    }
   });
 
   process.on("SIGINT", () => {

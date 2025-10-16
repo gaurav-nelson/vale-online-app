@@ -64,9 +64,17 @@
             <button
               id="lint-button"
               onclick="runValeLint()"
-              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent buttonMargin"
             >
               Lint
+            </button>
+            <button
+              id="ai-fix-button"
+              onclick="showAIFixModal()"
+              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect ai-fix-btn"
+              style="display: none;"
+            >
+              Fix issues with AI
             </button>
             <button
               id="github-button"
@@ -97,6 +105,14 @@
                 />
                 <span class="mdl-checkbox__label">Show suggestions</span>
               </label>
+            </span>
+          </li>
+          <li class="mdl-list__item" id="model-selection-container" style="display: none;">
+            <span class="mdl-list__item-primary-content">
+              <label for="ollamaModelSelect" style="display: block; margin-bottom: 8px;">AI Model</label>
+              <select id="ollamaModelSelect" class="model-select" onchange="saveSelectedModel(this)">
+                <option value="">Loading models...</option>
+              </select>
             </span>
           </li>
         </ul>
@@ -148,6 +164,101 @@
           <button type="button" class="mdl-snackbar__action"></button>
         </div>
       </main>
+    </div>
+    
+    <!-- AI Fix Modal -->
+    <div id="ai-fix-modal" class="ai-modal" style="display: none;">
+      <div class="ai-modal-content">
+        <div class="ai-modal-header">
+          <h4>Fix Issues with AI</h4>
+          <button class="ai-modal-close" onclick="closeAIFixModal()">&times;</button>
+        </div>
+        <div class="ai-modal-body">
+          <!-- Issue Selection View -->
+          <div id="issue-selection-view">
+            <div class="ai-modal-actions">
+              <button onclick="selectAllIssues()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Select All
+              </button>
+              <button onclick="deselectAllIssues()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Deselect All
+              </button>
+              <button onclick="selectAllErrors()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Select All Errors
+              </button>
+              <button onclick="selectAllWarnings()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Select All Warnings
+              </button>
+            </div>
+            <div id="issues-list" class="issues-list"></div>
+          </div>
+          
+          <!-- Approval View -->
+          <div id="approval-view" style="display: none;">
+            <div class="approval-progress">
+              <p id="approval-progress-text">Processing issue 1 of 5...</p>
+            </div>
+            <div class="approval-issue-details">
+              <span id="approval-severity" class="issue-severity"></span>
+              <span id="approval-line" class="issue-line"></span>
+              <div id="approval-check" class="issue-check"></div>
+              <div id="approval-message" class="issue-message"></div>
+            </div>
+            <div class="approval-comparison">
+              <div class="comparison-column">
+                <h5>Original Text</h5>
+                <div id="approval-original-text" class="comparison-text comparison-text-readonly"></div>
+              </div>
+              <div class="comparison-column">
+                <h5>AI Suggested Fix (editable)</h5>
+                <div id="approval-fixed-text" class="comparison-text comparison-text-editable" contenteditable="true" spellcheck="false"></div>
+              </div>
+            </div>
+            <div class="approval-actions">
+              <button onclick="approveCurrentFix()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect approval-btn-approve">
+                Approve
+              </button>
+              <button onclick="skipCurrentFix()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect approval-btn-skip">
+                Skip
+              </button>
+              <button onclick="retryCurrentFix()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect approval-btn-retry">
+                Retry
+              </button>
+              <button onclick="backToIssueList()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+                Back to List
+              </button>
+            </div>
+          </div>
+          
+          <!-- Loading View -->
+          <div id="ai-fix-loading" class="ai-fix-loading" style="display: none;">
+            <div class="mdl-spinner mdl-js-spinner is-active"></div>
+            <p id="ai-fix-status">Processing issues...</p>
+          </div>
+          
+          <!-- Completion Summary View -->
+          <div id="completion-summary" style="display: none;">
+            <h4>All Issues Processed</h4>
+            <div class="summary-stats">
+              <p><strong>Approved:</strong> <span id="summary-approved">0</span></p>
+              <p><strong>Skipped:</strong> <span id="summary-skipped">0</span></p>
+              <p><strong>Failed:</strong> <span id="summary-failed">0</span></p>
+            </div>
+            <p id="summary-message">Click "Apply Changes" to update your text with the approved fixes.</p>
+          </div>
+        </div>
+        <div class="ai-modal-footer">
+          <button onclick="closeAIFixModal()" id="modal-cancel-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+            Cancel
+          </button>
+          <button onclick="fixSelectedIssues()" id="fix-issues-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+            Fix Selected Issues
+          </button>
+          <button onclick="applyApprovedFixes()" id="apply-fixes-btn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" style="display: none;">
+            Apply Changes
+          </button>
+        </div>
+      </div>
     </div>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <script
