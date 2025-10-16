@@ -118,6 +118,33 @@ function showApprovalView(issue, originalText, suggestedText) {
   document.getElementById("approval-check").textContent = issue.Check;
   document.getElementById("approval-message").textContent = issue.Message;
   
+  // Populate model dropdown
+  const modelSelect = document.getElementById('approval-model-select');
+  modelSelect.innerHTML = '';
+  ollamaModels.forEach(model => {
+    const option = document.createElement('option');
+    option.value = model;
+    option.textContent = model;
+    if (model === selectedModel) {
+      option.selected = true;
+    }
+    modelSelect.appendChild(option);
+  });
+  
+  // Reset context input
+  document.getElementById('add-context-checkbox').checked = false;
+  document.getElementById('context-textarea').value = '';
+  document.getElementById('context-input-container').style.display = 'none';
+  
+  // Add event listener for context checkbox (remove old listener first)
+  const contextCheckbox = document.getElementById('add-context-checkbox');
+  const newCheckbox = contextCheckbox.cloneNode(true);
+  contextCheckbox.parentNode.replaceChild(newCheckbox, contextCheckbox);
+  newCheckbox.addEventListener('change', function() {
+    const container = document.getElementById('context-input-container');
+    container.style.display = this.checked ? 'block' : 'none';
+  });
+  
   // Show text comparison with word-level highlighting
   const { originalHighlighted, fixedHighlighted } = highlightTextDifferences(originalText, suggestedText);
   
@@ -239,13 +266,23 @@ async function retryCurrentFix() {
   // Re-process the current issue without incrementing index
   document.getElementById("approval-view").style.display = "none";
   document.getElementById("ai-fix-loading").style.display = "block";
+  
+  // Get selected model from dropdown
+  const modelFromDropdown = document.getElementById('approval-model-select').value;
+  
   document.getElementById("ai-fix-status").textContent = 
-    `Retrying AI suggestion for issue ${currentIssueIndex + 1} of ${selectedIssuesList.length} using ${selectedModel}...`;
+    `Retrying AI suggestion for issue ${currentIssueIndex + 1} of ${selectedIssuesList.length} using ${modelFromDropdown}...`;
   
   try {
     const editorText = editor.getValue();
     const paragraph = extractParagraph(editorText, currentIssue.Line - 1);
     const problematicText = extractProblematicText(editorText, currentIssue);
+    
+    // Get additional context if provided
+    let additionalContext = '';
+    if (document.getElementById('add-context-checkbox').checked) {
+      additionalContext = document.getElementById('context-textarea').value.trim();
+    }
     
     const response = await fetch("http://localhost:8080/api/ollama/fix", {
       method: "POST",
@@ -256,7 +293,8 @@ async function retryCurrentFix() {
         paragraph: paragraph,
         issue: currentIssue,
         problematicText: problematicText,
-        model: selectedModel,
+        model: modelFromDropdown,
+        additionalContext: additionalContext,
       }),
     });
     

@@ -105,6 +105,7 @@ body {
 /* Header row padding */
 .mdl-layout__header-row {
   padding-left: 20px !important;
+  padding-right: 20px !important;
 }
 
 /* Navigation button spacing */
@@ -719,4 +720,117 @@ body {
 
 .mdl-color--blue-grey-900 .settings-label {
   color: #eceff1;
+}
+
+/* Fix Options Styles */
+.fix-options-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.mdl-color--blue-grey-900 .fix-options-container {
+  background-color: #37474f;
+  border-color: #455a64;
+}
+
+.fix-option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.fix-option-row:last-child {
+  margin-bottom: 0;
+}
+
+.fix-option-label {
+  font-weight: 500;
+  margin-right: 12px;
+  min-width: 110px;
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .fix-option-label {
+  color: #eceff1;
+}
+
+.fix-model-select {
+  flex: 1;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background-color: white;
+  color: black;
+}
+
+.mdl-color--blue-grey-900 .fix-model-select {
+  background-color: #263238;
+  color: #eceff1;
+  border-color: #546e7a;
+}
+
+.fix-model-select:focus {
+  outline: none;
+  border-color: #3f51b5;
+}
+
+.fix-option-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .fix-option-checkbox {
+  color: #eceff1;
+}
+
+.fix-option-checkbox input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.fix-option-checkbox span {
+  font-weight: 500;
+}
+
+.context-input-container {
+  margin-top: 12px;
+}
+
+.context-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  background-color: white;
+  color: black;
+  box-sizing: border-box;
+}
+
+.mdl-color--blue-grey-900 .context-textarea {
+  background-color: #263238;
+  color: #eceff1;
+  border-color: #546e7a;
+}
+
+.context-textarea:focus {
+  outline: none;
+  border-color: #3f51b5;
+}
+
+.context-textarea::placeholder {
+  color: #999;
+}
+
+.mdl-color--blue-grey-900 .context-textarea::placeholder {
+  color: #78909c;
 }

@@ -151,7 +151,7 @@
                 <label for="issue-filter-select" class="filter-label">Select:</label>
                 <select id="issue-filter-select" class="filter-select" onchange="applyIssueFilter(this.value)">
                   <option value="all">All</option>
-                  <option value="none">None</option>
+                  <option value="none" selected>None</option>
                   <option value="errors">Errors</option>
                   <option value="warnings">Warnings</option>
                   <option value="suggestions">Suggestions</option>
@@ -171,6 +171,26 @@
               <span id="approval-line" class="issue-line"></span>
               <div id="approval-check" class="issue-check"></div>
               <div id="approval-message" class="issue-message"></div>
+            </div>
+            <div class="fix-options-container">
+              <div class="fix-option-row">
+                <label for="approval-model-select" class="fix-option-label">Change model:</label>
+                <select id="approval-model-select" class="fix-model-select"></select>
+              </div>
+              <div class="fix-option-row">
+                <label class="fix-option-checkbox">
+                  <input type="checkbox" id="add-context-checkbox">
+                  <span>Add context</span>
+                </label>
+              </div>
+              <div id="context-input-container" class="context-input-container" style="display: none;">
+                <textarea 
+                  id="context-textarea" 
+                  class="context-textarea" 
+                  placeholder="Provide additional context to help the AI improve the fix (e.g., 'Use British English spelling', 'Keep the technical terminology', etc.)..."
+                  rows="3"
+                ></textarea>
+              </div>
             </div>
             <div class="approval-comparison">
               <div class="comparison-column">
