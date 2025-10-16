@@ -22,7 +22,7 @@
       type="text/css"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"
     />
-    <link rel="stylesheet" type="text/css" href="./app.css" />
+    <link rel="stylesheet" type="text/css" href="./css/app.css" />
     <link rel="shortcut icon" href="./favicon.ico" />
     <link
       rel="stylesheet"
@@ -177,18 +177,16 @@
           <!-- Issue Selection View -->
           <div id="issue-selection-view">
             <div class="ai-modal-actions">
-              <button onclick="selectAllIssues()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-                Select All
-              </button>
-              <button onclick="deselectAllIssues()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-                Deselect All
-              </button>
-              <button onclick="selectAllErrors()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-                Select All Errors
-              </button>
-              <button onclick="selectAllWarnings()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-                Select All Warnings
-              </button>
+              <div class="filter-dropdown-container">
+                <label for="issue-filter-select" class="filter-label">Select:</label>
+                <select id="issue-filter-select" class="filter-select" onchange="applyIssueFilter(this.value)">
+                  <option value="all">All</option>
+                  <option value="none">None</option>
+                  <option value="errors">Errors</option>
+                  <option value="warnings">Warnings</option>
+                  <option value="suggestions">Suggestions</option>
+                </select>
+              </div>
             </div>
             <div id="issues-list" class="issues-list"></div>
           </div>
@@ -272,7 +270,15 @@
       type="text/javascript"
       src="https://cdn.jsdelivr.net/npm/codemirror-asciidoc@1.0.4/lib/asciidoc.min.js"
     ></script>
-    <script type="text/javascript" src="./placeholder.js"></script>
-    <script type="text/javascript" src="./app.js"></script>
+    <script type="text/javascript" src="./js/placeholder.js"></script>
+    <script type="text/javascript" src="./js/editor-init.js"></script>
+    <script type="text/javascript" src="./js/vale-core.js"></script>
+    <script type="text/javascript" src="./js/results-display.js"></script>
+    <script type="text/javascript" src="./js/theme-manager.js"></script>
+    <script type="text/javascript" src="./js/file-handlers.js"></script>
+    <script type="text/javascript" src="./js/ui-helpers.js"></script>
+    <script type="text/javascript" src="./js/ollama-integration.js"></script>
+    <script type="text/javascript" src="./js/ai-fix-modal.js"></script>
+    <script type="text/javascript" src="./js/ai-fix-workflow.js"></script>
   </body>
 </html>
