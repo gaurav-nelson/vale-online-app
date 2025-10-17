@@ -1,8 +1,0 @@
----
-extends: existence
-scope: raw
-level: error
-link: https://redhat-documentation.github.io/supplementary-style-guide/#link-text
-message: "The xref is missing link text."
-raw:
-  - 'xref(.*)(\.adoc)#(.*)\[\]'

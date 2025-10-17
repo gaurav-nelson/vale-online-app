@@ -1,0 +1,1000 @@
+/* ===========================
+   Reset & Base Styles
+   =========================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colors - Dark theme with Red Hat branding */
+    --bg-primary: #0f1419;
+    --bg-secondary: #1a1f2e;
+    --bg-tertiary: #252b3b;
+    --bg-elevated: #2d3548;
+    
+    --text-primary: #e6edf3;
+    --text-secondary: #9198a1;
+    --text-muted: #6e7681;
+    
+    --accent-red: #ee0000;
+    --accent-red-hover: #cc0000;
+    --accent-red-light: rgba(238, 0, 0, 0.1);
+    
+    --border-color: #30363d;
+    --border-hover: #484f58;
+    
+    --success-color: #3fb950;
+    --warning-color: #d29922;
+    
+    /* Spacing */
+    --container-max-width: 1200px;
+    --section-padding: 5rem 2rem;
+    
+    /* Typography */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* ===========================
+   Navigation
+   =========================== */
+
+.nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(15, 20, 25, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    padding: 1rem 0;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: opacity 0.2s;
+}
+
+.logo:hover {
+    opacity: 0.8;
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+}
+
+.nav-github-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* ===========================
+   Hero Section
+   =========================== */
+
+.hero {
+    padding: 8rem 0 6rem;
+    margin-top: 60px;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto 4rem;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-title-accent {
+    display: block;
+    background: linear-gradient(135deg, var(--accent-red) 0%, #ff4d4d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 0.5rem;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
+    color: var(--text-secondary);
+    margin-bottom: 3rem;
+    line-height: 1.6;
+}
+
+.hero-cta {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-hint {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.hero-hint code {
+    color: var(--accent-red);
+}
+
+.hero-demo {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* ===========================
+   Command Box & Copy Button
+   =========================== */
+
+.command-box {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s;
+}
+
+.command-box:hover {
+    border-color: var(--border-hover);
+}
+
+.command-text {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.command-text::-webkit-scrollbar {
+    height: 6px;
+}
+
+.command-text::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.command-text::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.copy-btn {
+    position: relative;
+    background: var(--accent-red);
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.copy-btn:hover {
+    background: var(--accent-red-hover);
+    transform: scale(1.05);
+}
+
+.copy-btn:active {
+    transform: scale(0.98);
+}
+
+.copy-icon,
+.check-icon {
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.check-icon {
+    position: absolute;
+    opacity: 0;
+}
+
+.copy-btn.copied .copy-icon {
+    opacity: 0;
+}
+
+.copy-btn.copied .check-icon {
+    opacity: 1;
+}
+
+/* ===========================
+   Demo Media & Placeholder
+   =========================== */
+
+.demo-media-container {
+    position: relative;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.demo-media-container:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.demo-media {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+}
+
+/* Placeholder state when image fails to load */
+.demo-media-container.demo-placeholder {
+    border-style: dashed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-media-container:not(.demo-placeholder) .placeholder-content {
+    display: none;
+}
+
+.placeholder-content {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+}
+
+.placeholder-icon {
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.placeholder-content p {
+    font-size: 0.95rem;
+}
+
+/* Legacy placeholder class (kept for backwards compatibility) */
+.demo-placeholder {
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.demo-placeholder:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-tertiary);
+}
+
+/* ===========================
+   Section Styles
+   =========================== */
+
+.section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 4rem;
+}
+
+/* ===========================
+   Features Section
+   =========================== */
+
+.features {
+    padding: var(--section-padding);
+    background: var(--bg-secondary);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-red);
+    box-shadow: 0 8px 24px rgba(238, 0, 0, 0.15);
+}
+
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-red-light);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.feature-icon svg {
+    color: var(--accent-red);
+}
+
+.feature-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* ===========================
+   How It Works Section
+   =========================== */
+
+.how-it-works {
+    padding: var(--section-padding);
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.step {
+    text-align: center;
+}
+
+.step-number {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--accent-red) 0%, #ff4d4d 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 4px 16px rgba(238, 0, 0, 0.3);
+}
+
+.step-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.step-description {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* ===========================
+   Demo Section
+   =========================== */
+
+.demo-section {
+    padding: var(--section-padding);
+    background: var(--bg-secondary);
+}
+
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.demo-item {
+    text-align: center;
+}
+
+.demo-caption {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* ===========================
+   Installation Section
+   =========================== */
+
+.installation {
+    padding: var(--section-padding);
+}
+
+.install-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.install-tab {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-family: var(--font-primary);
+    transition: all 0.2s;
+}
+
+.install-tab:hover {
+    border-color: var(--border-hover);
+    color: var(--text-primary);
+}
+
+.install-tab.active {
+    background: var(--accent-red);
+    border-color: var(--accent-red);
+    color: white;
+}
+
+.install-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.install-panel {
+    display: none;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2.5rem;
+}
+
+.install-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.install-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.install-subtitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--text-primary);
+}
+
+.install-description {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.install-steps {
+    margin-top: 1.5rem;
+}
+
+.install-steps ol {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.install-steps li {
+    margin-bottom: 0.75rem;
+}
+
+.install-steps code,
+.install-steps a {
+    color: var(--accent-red);
+}
+
+.install-steps a {
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.install-steps a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.install-panel .command-box {
+    margin: 1.5rem 0;
+}
+
+/* ===========================
+   Footer
+   =========================== */
+
+.footer {
+    padding: 4rem 0 2rem;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+.footer-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.footer-text {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.footer-links {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: var(--accent-red);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ===========================
+   Utility Classes
+   =========================== */
+
+code {
+    font-family: var(--font-mono);
+    background: var(--bg-tertiary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.inline-link {
+    color: var(--accent-red);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.inline-link:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* ===========================
+   Responsive Design
+   =========================== */
+
+@media (max-width: 768px) {
+    :root {
+        --section-padding: 3rem 1.5rem;
+    }
+    
+    .nav-links {
+        gap: 1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.85rem;
+    }
+    
+    .hero {
+        padding: 6rem 0 4rem;
+    }
+    
+    .hero-content {
+        margin-bottom: 3rem;
+    }
+    
+    .command-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .command-text {
+        font-size: 0.75rem;
+        text-align: center;
+    }
+    
+    .copy-btn {
+        width: 100%;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .steps {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .demo-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .install-panel {
+        padding: 1.5rem;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .nav-links {
+        display: none;
+    }
+    
+    .logo {
+        font-size: 1rem;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .install-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .install-tab {
+        width: 100%;
+    }
+}
+
+/* ===========================
+   Animations & Effects
+   =========================== */
+
+@media (prefers-reduced-motion: no-preference) {
+    .feature-card,
+    .step,
+    .demo-item {
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+    
+    .feature-card:nth-child(1),
+    .step:nth-child(1),
+    .demo-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    
+    .feature-card:nth-child(2),
+    .step:nth-child(2),
+    .demo-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .feature-card:nth-child(3),
+    .step:nth-child(3),
+    .demo-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    
+    .feature-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+    
+    .feature-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+    
+    .feature-card:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===========================
+   Image Modal / Lightbox
+   =========================== */
+
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: fadeIn 0.3s ease-in;
+}
+
+.image-modal.active {
+    display: block;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 85vh;
+    object-fit: contain;
+    animation: zoomIn 0.3s ease-out;
+    border-radius: 8px;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+@keyframes zoomIn {
+    from {
+        transform: translateY(-50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 30px;
+    right: 45px;
+    color: #f1f1f1;
+    font-size: 50px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 2001;
+    line-height: 1;
+    user-select: none;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: var(--accent-red);
+}
+
+.modal-caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 20px 0;
+    font-size: 1.1rem;
+}
+
+/* Clickable demo images */
+.demo-media-container.clickable {
+    cursor: pointer;
+    position: relative;
+}
+
+.demo-media-container.clickable::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(238, 0, 0, 0);
+    transition: background 0.3s;
+    pointer-events: none;
+}
+
+.demo-media-container.clickable:hover::after {
+    background: rgba(238, 0, 0, 0.1);
+}
+
+/* Click hint overlay */
+.click-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    font-size: 0.95rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.demo-media-container.clickable:hover .click-hint {
+    opacity: 1;
+}
+
+.click-hint svg {
+    flex-shrink: 0;
+}
+
+/* Hide click hint on placeholder state */
+.demo-media-container.demo-placeholder .click-hint {
+    display: none;
+}
+
+/* Keyboard navigation for modal */
+.image-modal:focus {
+    outline: none;
+}
+
+/* Print styles */
+@media print {
+    .nav,
+    .copy-btn,
+    .image-modal {
+        display: none;
+    }
+}
+
+/* Mobile responsiveness for modal */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        max-height: 80vh;
+    }
+    
+    .modal-close {
+        top: 15px;
+        right: 20px;
+        font-size: 40px;
+    }
+    
+    .modal-caption {
+        width: 90%;
+        font-size: 1rem;
+        padding: 15px 0;
+    }
+    
+    .click-hint {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
