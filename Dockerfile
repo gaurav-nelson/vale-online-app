@@ -18,7 +18,7 @@ RUN apk update && \
     apk upgrade && \
     apk add --no-cache asciidoctor vale nodejs && \
     rm -rf /var/cache/apk/* && \
-    gem install uri
+    gem install uri asciidoctor-dita-topic
 
 WORKDIR /usr/src/app
 
