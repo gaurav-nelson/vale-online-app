@@ -262,5 +262,10 @@ function updateCounts() {
     document.getElementById("suggestionChip").style.display = "block";
   }
   updateAIFixButtonVisibility();
+  
+  // Update Convert to DITA button visibility
+  if (typeof updateConvertToDitaButtonVisibility !== "undefined") {
+    updateConvertToDitaButtonVisibility();
+  }
 }
 

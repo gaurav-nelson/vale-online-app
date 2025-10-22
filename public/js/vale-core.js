@@ -19,7 +19,11 @@ async function postData(url, data) {
 
 function sendRequest(adoc) {
   //console.log("REQ DATA: ", JSON.stringify(adoc));
-  postData("http://localhost:8080/", JSON.stringify(adoc))
+  // Get current Vale mode
+  const mode = typeof getCurrentValeMode !== "undefined" ? getCurrentValeMode() : "standard";
+  const requestData = { ...adoc, mode };
+  
+  postData("http://localhost:8080/lint", JSON.stringify(requestData))
     .then((data) => {
       loadingSpinner.style.display = "none";
       cover.style.display = "none";
@@ -34,6 +38,11 @@ function sendRequest(adoc) {
         valeIssuesData = data["stdin.adoc"] || [];
         highlightResults(data["stdin.adoc"]);
         updateCounts();
+      }
+      
+      // Update Convert to DITA button visibility
+      if (typeof updateConvertToDitaButtonVisibility !== "undefined") {
+        updateConvertToDitaButtonVisibility();
       }
     })
     .catch((error) => {

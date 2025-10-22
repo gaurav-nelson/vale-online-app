@@ -722,6 +722,38 @@ body {
   color: #eceff1;
 }
 
+.settings-separator {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 20px 0;
+}
+
+.mdl-color--blue-grey-900 .settings-separator {
+  background-color: #455a64;
+}
+
+.settings-section-title {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .settings-section-title {
+  color: #eceff1;
+}
+
+.settings-hint {
+  margin: 4px 0 0 28px;
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+}
+
+.mdl-color--blue-grey-900 .settings-hint {
+  color: #b0bec5;
+}
+
 /* Fix Options Styles */
 .fix-options-container {
   margin-bottom: 20px;
@@ -833,4 +865,98 @@ body {
 
 .mdl-color--blue-grey-900 .context-textarea::placeholder {
   color: #78909c;
+}
+
+/* Mode Toggle Switch Styles */
+.mode-toggle-container {
+  display: flex;
+  align-items: center;
+}
+
+/* Left-positioned mode toggle (near app name) */
+.mode-toggle-left {
+  margin-left: 32px;
+  margin-right: 0;
+}
+
+.mode-toggle-label {
+  color: white;
+  font-weight: 500;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.mdl-color--blue-grey-900 .mode-toggle-label {
+  color: #eceff1;
+}
+
+/* Adjust switch colors for better visibility on header */
+.mode-toggle-container .mdl-switch.is-checked .mdl-switch__track {
+  background-color: rgba(76, 175, 80, 0.5);
+}
+
+.mode-toggle-container .mdl-switch.is-checked .mdl-switch__thumb {
+  background-color: #4caf50;
+}
+
+/* Convert to DITA Button Styles */
+#convert-to-dita-button {
+  margin-left: 12px;
+  background-color: #4caf50 !important;
+}
+
+#convert-to-dita-button:hover {
+  background-color: #45a049 !important;
+}
+
+/* DITA Modal Styles */
+.dita-modal-content {
+  max-width: 1200px;
+  max-height: 90vh;
+}
+
+.dita-output-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.dita-output {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 20px;
+  font-family: 'Courier New', Consolas, Monaco, monospace;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 500px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .dita-output {
+  background-color: #263238;
+  border-color: #455a64;
+  color: #eceff1;
+}
+
+.dita-error {
+  padding: 20px;
+  text-align: center;
+}
+
+.dita-error p {
+  color: #d32f2f;
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.mdl-color--blue-grey-900 .dita-error p {
+  color: #ef5350;
 }

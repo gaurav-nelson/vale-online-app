@@ -28,6 +28,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.static("public"));
 
+// POST /lint - Main linting endpoint with mode support
+app.post("/lint", cors(corsOptions), async function (req, res) {
+  const reqData = req.body;
+  if (!validateInput(reqData.textarea)) {
+    return res.status(401).send({ error: true, msg: "Missing or invalid data!" });
+  }
+
+  const mode = reqData.mode || "standard";
+  const asciidocString = reqData.textarea.replace(regex, " ");
+  
+  try {
+    // Select appropriate Vale config based on mode
+    const valeConfig = mode === "dita" ? ".vale-asciidocdita.ini" : ".vale.ini";
+    
+    // Write content to temporary file
+    await fs.promises.writeFile("stdin.adoc", asciidocString);
+    
+    // Run Vale with the appropriate config
+    const output = await runVale("stdin.adoc", valeConfig);
+    res.send(output);
+  } catch (err) {
+    handleError(res, err, "Internal server error!");
+  }
+});
+
+// Legacy endpoint for backward compatibility
 app.post("/", cors(corsOptions), async function (req, res) {
   const reqData = req.body;
   if (!validateInput(reqData.textarea)) {
@@ -37,16 +63,16 @@ app.post("/", cors(corsOptions), async function (req, res) {
   const asciidocString = reqData.textarea.replace(regex, " ");
   try {
     await fs.promises.writeFile("stdin.adoc", asciidocString);
-    const output = await runVale("stdin.adoc");
+    const output = await runVale("stdin.adoc", ".vale.ini");
     res.send(output);
   } catch (err) {
     handleError(res, err, "Internal server error!");
   }
 });
 
-const runVale = (filePath) => {
+const runVale = (filePath, configFile = ".vale.ini") => {
   return new Promise((resolve, reject) => {
-    const valeLint = spawn("vale", ["--output=JSON", filePath]);
+    const valeLint = spawn("vale", ["--config=" + configFile, "--output=JSON", filePath]);
     let output = "";
 
     valeLint.stdout.setEncoding("utf8");
@@ -140,6 +166,115 @@ app.post("/api/ollama/fix", cors(corsOptions), async function (req, res) {
   }
 });
 
+// POST /sync-rules - Sync Vale rules for a specific mode
+app.post("/sync-rules", cors(corsOptions), async function (req, res) {
+  const { mode } = req.body;
+  
+  if (!mode || (mode !== "standard" && mode !== "dita")) {
+    return res.status(400).send({ error: true, msg: "Invalid mode parameter" });
+  }
+
+  const configFile = mode === "dita" ? ".vale-asciidocdita.ini" : ".vale.ini";
+  
+  try {
+    log(`🔄 Syncing Vale rules for ${mode} mode...`);
+    await runValeSync(configFile);
+    log(`✅ Vale sync completed for ${mode} mode`);
+    res.send({ success: true, mode });
+  } catch (error) {
+    log(`❗ Vale sync failed for ${mode} mode:`, error);
+    handleError(res, error, "Failed to sync Vale rules");
+  }
+});
+
+// POST /convert-to-dita - Convert AsciiDoc to DITA
+app.post("/convert-to-dita", cors(corsOptions), async function (req, res) {
+  const { asciidocContent, settings } = req.body;
+  
+  if (!asciidocContent || typeof asciidocContent !== "string") {
+    return res.status(400).send({ error: true, msg: "Missing or invalid asciidocContent" });
+  }
+
+  const tempInputFile = `temp-input-${Date.now()}.adoc`;
+  const tempOutputFile = `temp-output-${Date.now()}.dita`;
+  
+  try {
+    // Write AsciiDoc content to temporary file
+    await fs.promises.writeFile(tempInputFile, asciidocContent);
+    
+    // Build asciidoctor command with DITA options
+    const args = ["-r", "dita-topic", "-b", "dita-topic", "-o", tempOutputFile];
+    
+    // Add optional settings if provided
+    if (settings) {
+      if (settings.enableAuthors) {
+        args.push("-a", "dita-topic-authors=on");
+      }
+      if (settings.disableFloatingTitles) {
+        args.push("-a", "dita-topic-titles=off");
+      }
+      if (settings.disableCallouts) {
+        args.push("-a", "dita-topic-callouts=off");
+      }
+      if (settings.secureMode) {
+        args.push("-S", "secure");
+      }
+    }
+    
+    args.push(tempInputFile);
+    
+    // Run asciidoctor with dita-topic converter
+    await new Promise((resolve, reject) => {
+      const converter = spawn("asciidoctor", args);
+      let errorOutput = "";
+      let stdOutput = "";
+      
+      converter.stdout.on("data", (data) => {
+        stdOutput += data.toString();
+      });
+      
+      converter.stderr.on("data", (data) => {
+        errorOutput += data.toString();
+      });
+      
+      converter.on("error", (error) => {
+        log("Error running asciidoctor:", error);
+        reject(error);
+      });
+      
+      converter.on("close", (code) => {
+        if (code !== 0) {
+          log("Conversion stderr:", errorOutput);
+          log("Conversion stdout:", stdOutput);
+          reject(new Error(`Conversion failed with code ${code}: ${errorOutput || stdOutput}`));
+        } else {
+          // Log warnings if any
+          if (errorOutput) {
+            log("Conversion warnings:", errorOutput);
+          }
+          resolve();
+        }
+      });
+    });
+    
+    // Read the converted DITA content
+    const ditaContent = await fs.promises.readFile(tempOutputFile, "utf8");
+    
+    // Clean up temporary files
+    await fs.promises.unlink(tempInputFile).catch(() => {});
+    await fs.promises.unlink(tempOutputFile).catch(() => {});
+    
+    res.send({ ditaContent });
+  } catch (error) {
+    // Clean up temporary files in case of error
+    await fs.promises.unlink(tempInputFile).catch(() => {});
+    await fs.promises.unlink(tempOutputFile).catch(() => {});
+    
+    log("Error converting to DITA:", error);
+    handleError(res, error, "Failed to convert AsciiDoc to DITA");
+  }
+});
+
 const start = async () => {
   const isConnected = await checkInternet();
   const valeIniPath = process.env.VALE_INI_PATH;
@@ -179,19 +314,28 @@ const start = async () => {
 };
 
 const runValeSyncAndStartServer = async () => {
-  log("� Running vale sync...");
+  log("� Running vale sync for Standard mode...");
   try {
-    await runValeSync();
-    log("✅ Vale sync completed.");
+    await runValeSync(".vale.ini");
+    log("✅ Vale sync completed for Standard mode.");
   } catch (error) {
-    log("❗ Vale sync process failed, using the default rules.");
+    log("❗ Vale sync failed for Standard mode, using the default rules.");
   }
+  
+  log("� Running vale sync for DITA mode...");
+  try {
+    await runValeSync(".vale-asciidocdita.ini");
+    log("✅ Vale sync completed for DITA mode.");
+  } catch (error) {
+    log("❗ Vale sync failed for DITA mode, using the default rules.");
+  }
+  
   startServer();
 };
 
-const runValeSync = () => {
+const runValeSync = (configFile = ".vale.ini") => {
   return new Promise((resolve, reject) => {
-    const valeSync = spawn("vale", ["sync"]);
+    const valeSync = spawn("vale", ["--config=" + configFile, "sync"]);
 
     valeSync.stdout.on("data", (data) => {
       log(`📦 ${data}`);

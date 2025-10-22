@@ -46,6 +46,12 @@
             <img src="./github-mark-white.svg" alt="GitHub" class="github-icon-left">
             <span id="appHeader" class="mdl-layout-title">Vale-at-Red-Hat online</span>
           </a>
+          <div class="mode-toggle-container mode-toggle-left">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="mode-toggle-switch">
+              <input type="checkbox" id="mode-toggle-switch" class="mdl-switch__input" onchange="toggleValeMode()">
+              <span class="mdl-switch__label mode-toggle-label">DITA mode</span>
+            </label>
+          </div>
           <div class="mdl-layout-spacer"></div>
           <nav class="mdl-navigation">
             <button
@@ -76,6 +82,14 @@
               style="display: none;"
             >
               Fix issues with AI
+            </button>
+            <button
+              id="convert-to-dita-button"
+              onclick="openConvertToDitaModal()"
+              class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored buttonMargin"
+              style="display: none;"
+            >
+              Convert to DITA
             </button>
             <button
               id="settings-button"
@@ -274,6 +288,60 @@
               <option value="">Loading models...</option>
             </select>
           </div>
+          
+          <!-- DITA Conversion Settings (only visible in DITA mode) -->
+          <div id="dita-settings-container" style="display: none;">
+            <div class="settings-separator"></div>
+            <h5 class="settings-section-title">DITA Conversion Options</h5>
+            <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaEnableAuthorsCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaEnableAuthorsCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('enableAuthors', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Enable author lines</span>
+              </label>
+              <p class="settings-hint">Process author lines as metadata instead of paragraphs</p>
+            </div>
+            <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaDisableFloatingTitlesCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaDisableFloatingTitlesCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('disableFloatingTitles', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Disable floating titles</span>
+              </label>
+              <p class="settings-hint">Don't convert floating titles (may lose content)</p>
+            </div>
+            <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaDisableCalloutsCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaDisableCalloutsCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('disableCallouts', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Disable callouts</span>
+              </label>
+              <p class="settings-hint">Don't convert callout annotations (may lose content)</p>
+            </div>
+            <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaSecureModeCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaSecureModeCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('secureMode', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Secure mode (disable includes)</span>
+              </label>
+              <p class="settings-hint">Only convert the current file, don't resolve include directives</p>
+            </div>
+          </div>
         </div>
         <div class="ai-modal-footer">
           <button onclick="closeSettingsModal()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
@@ -282,7 +350,45 @@
         </div>
       </div>
     </div>
+    
+    <!-- DITA Conversion Modal -->
+    <div id="dita-conversion-modal" class="ai-modal" style="display: none;">
+      <div class="ai-modal-content dita-modal-content">
+        <div class="ai-modal-header">
+          <h4>DITA Conversion Result</h4>
+          <button class="ai-modal-close" onclick="closeDitaModal()">&times;</button>
+        </div>
+        <div class="ai-modal-body">
+          <div id="dita-loading" class="ai-fix-loading" style="display: none;">
+            <div class="mdl-spinner mdl-js-spinner is-active"></div>
+            <p>Converting AsciiDoc to DITA...</p>
+          </div>
+          <div id="dita-error" class="dita-error" style="display: none;">
+            <p id="dita-error-message"></p>
+          </div>
+          <div id="dita-output-container" style="display: none;">
+            <div class="dita-output-actions">
+              <button onclick="copyDitaToClipboard()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                <i class="material-icons" style="vertical-align: middle; margin-right: 4px;">content_copy</i>
+                Copy to Clipboard
+              </button>
+              <button onclick="downloadDitaFile()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                <i class="material-icons" style="vertical-align: middle; margin-right: 4px;">download</i>
+                Download DITA File
+              </button>
+            </div>
+            <div id="dita-output" class="dita-output"></div>
+          </div>
+        </div>
+        <div class="ai-modal-footer">
+          <button onclick="closeDitaModal()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.20/codemirror.min.js" integrity="sha512-hJEMjfR4ds7mXbBot3i/R+CsiyYpeWSezXul8uLBT8wXAHPUdhRgl4LLTtMGwjarftGKiQqK1v20XScm0ANTPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script
       type="text/javascript"
@@ -298,5 +404,6 @@
     <script type="text/javascript" src="./js/ollama-integration.js"></script>
     <script type="text/javascript" src="./js/ai-fix-modal.js"></script>
     <script type="text/javascript" src="./js/ai-fix-workflow.js"></script>
+    <script type="text/javascript" src="./js/mode-manager.js"></script>
   </body>
 </html>
