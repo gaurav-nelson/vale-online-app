@@ -1,7 +1,16 @@
 ![Demo](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYThucGZlZncwbGE0dGN6MW4yZmt3dTJ2YWRreHp2MW50amJ1ZTBrayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/v8twgFNMaK511l844i/source.gif)
 
 # Vale at Red Hat online app
-Simple web application to run Vale at Red Hat linting on a container locally with optional AI-powered issue fixing using Ollama. 
+Simple web application to run Vale at Red Hat linting on a container locally with optional AI-powered issue fixing using Ollama and AsciiDoc to DITA conversion.
+
+## Features
+
+✨ **Vale Linting**: Lint AsciiDoc content using Vale at Red Hat rules  
+🎯 **AsciiDocDITA Mode**: Switch to DITA-specific linting rules with one-click DITA conversion  
+🤖 **AI-Powered Fixing**: Automatically fix Vale issues using Ollama  
+⚙️ **Customizable Settings**: Configure DITA conversion options and AI models  
+🌓 **Dark Mode Support**: Toggle between light and dark themes  
+💾 **Download & Copy**: Easily download or copy converted DITA files  
 
 ## How to run
 1. Run the following command to download the image and start the container:
@@ -51,6 +60,38 @@ docker run --rm -p 8080:8080 -e OLLAMA_HOST=localhost -e OLLAMA_PORT=11434 quay.
    - Approve, Skip, or Retry for a new suggestion
 6. After reviewing all issues, click "Apply Changes" to update your text
 7. Choose your preferred AI model from the Settings menu
+
+## AsciiDocDITA Mode
+
+The app includes a special **DITA mode** for converting AsciiDoc files to DITA format with DITA-specific linting rules.
+
+### How to use
+
+1. **Enable DITA Mode**: Toggle the "DITA mode" switch in the header (near the app title)
+2. **Lint your content**: Paste your AsciiDoc content and click "Lint"
+3. **Fix any issues**: DITA mode uses strict DITA-specific rules from the [asciidoctor-dita-vale](https://github.com/jhradilek/asciidoctor-dita-vale) package
+4. **Convert to DITA**: Once your content has no errors or warnings, the "Convert to DITA" button appears
+5. **Get your DITA file**: 
+   - View the converted DITA XML in the modal
+   - Copy to clipboard or download the file
+   - The filename is automatically extracted from your document's `id` attribute
+
+### DITA Conversion Settings
+
+Access DITA conversion options from the Settings menu (gear icon) when in DITA mode:
+
+- **Enable author lines**: Process author lines as metadata instead of paragraphs
+- **Disable floating titles**: Don't convert floating titles (may lose content)
+- **Disable callouts**: Don't convert callout annotations (may lose content)
+- **Secure mode** *(enabled by default)*: Only convert the current file, don't resolve include directives
+
+### Technical Details
+
+- Uses `asciidoctor-dita-topic` gem for conversion
+- Applies DITA-specific Vale rules during linting
+- Mode preference is saved in your browser (localStorage)
+- Non-destructive: original AsciiDoc content remains unchanged
+- Supports custom DITA conversion options via Settings
 
 ## Using custom Vale configuration
 If you want to use a custom Vale configuration, you can mount a volume with the configuration file and specify the `VALE_INI_PATH` environment variable.
