@@ -294,6 +294,31 @@
             <div class="settings-separator"></div>
             <h5 class="settings-section-title">DITA Conversion Options</h5>
             <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaAutoSpecializeCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaAutoSpecializeCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('autoSpecialize', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Auto-convert to specialized DITA</span>
+              </label>
+              <p class="settings-hint">Automatically detect type and convert to specialized DITA</p>
+            </div>
+            <div class="settings-option">
+              <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaAutoCleanupCheckbox">
+                <input
+                  type="checkbox"
+                  id="ditaAutoCleanupCheckbox"
+                  class="mdl-checkbox__input"
+                  onchange="saveDitaSetting('autoCleanup', this.checked)"
+                />
+                <span class="mdl-checkbox__label">Auto-cleanup DITA</span>
+              </label>
+              <p class="settings-hint">Automatically clean up DITA files after conversion</p>
+            </div>
+            <div class="settings-separator"></div>
+            <div class="settings-option">
               <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="ditaEnableAuthorsCheckbox">
                 <input
                   type="checkbox"
@@ -355,7 +380,10 @@
     <div id="dita-conversion-modal" class="ai-modal" style="display: none;">
       <div class="ai-modal-content dita-modal-content">
         <div class="ai-modal-header">
-          <h4>DITA Conversion Result</h4>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h4>DITA Conversion Result</h4>
+            <span id="dita-type-badge" class="dita-type-badge" style="display: none;"></span>
+          </div>
           <button class="ai-modal-close" onclick="closeDitaModal()">&times;</button>
         </div>
         <div class="ai-modal-body">
@@ -378,6 +406,34 @@
               </button>
             </div>
             <div id="dita-output" class="dita-output"></div>
+          </div>
+          <!-- Generic DITA view with specialization buttons -->
+          <div id="dita-specialization-view" style="display: none;">
+            <div class="dita-output-actions">
+              <button onclick="copyDitaToClipboard()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                <i class="material-icons" style="vertical-align: middle; margin-right: 4px;">content_copy</i>
+                Copy to Clipboard
+              </button>
+              <button onclick="downloadDitaFile()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                <i class="material-icons" style="vertical-align: middle; margin-right: 4px;">download</i>
+                Download Generic DITA
+              </button>
+            </div>
+            <div id="dita-generic-output" class="dita-output"></div>
+            <div class="dita-specialization-actions">
+              <p style="margin-top: 20px; margin-bottom: 10px; font-weight: 500; font-size: 1rem;">Convert to specialized DITA:</p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="handleSpecializationClick('concept')" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                  Convert to Concept
+                </button>
+                <button onclick="handleSpecializationClick('reference')" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                  Convert to Reference
+                </button>
+                <button onclick="handleSpecializationClick('task')" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
+                  Convert to Task
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="ai-modal-footer">

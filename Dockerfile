@@ -16,9 +16,10 @@ RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >>/etc/apk/reposito
 # gem install uri is a vulnerability fix
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache asciidoctor vale nodejs && \
+    apk add --no-cache asciidoctor vale nodejs python3 py3-pip && \
     rm -rf /var/cache/apk/* && \
-    gem install uri asciidoctor-dita-topic
+    gem install uri asciidoctor-dita-topic && \
+    pip3 install --no-cache-dir --break-system-packages dita-convert dita-cleanup
 
 WORKDIR /usr/src/app
 

@@ -1,7 +1,7 @@
 {
   "name": "vale-online-app",
-  "version": "2.0.1",
-  "description": "Run vale lint online based on https://github.com/redhat-documentation/vale-at-red-hat rules. Convert AsciiDoc to a DITA 1.3 topic.",
+  "version": "2.1.0",
+  "description": "Run vale lint online based on https://github.com/redhat-documentation/vale-at-red-hat rules. Convert AsciiDoc to specialized DITA 1.3 topics (concept, reference, task).",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

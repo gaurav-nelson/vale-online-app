@@ -1005,3 +1005,65 @@ body {
 .mdl-color--blue-grey-900 .dita-error p {
   color: #ef5350;
 }
+
+/* DITA Type Badge Styles */
+.dita-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.dita-type-badge.concept {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.dita-type-badge.reference {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.dita-type-badge.task {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+
+.mdl-color--blue-grey-900 .dita-type-badge.concept {
+  background-color: #1a237e;
+  color: #90caf9;
+}
+
+.mdl-color--blue-grey-900 .dita-type-badge.reference {
+  background-color: #4e342e;
+  color: #ffab91;
+}
+
+.mdl-color--blue-grey-900 .dita-type-badge.task {
+  background-color: #1b5e20;
+  color: #a5d6a7;
+}
+
+/* DITA Specialization Actions */
+.dita-specialization-actions {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+.mdl-color--blue-grey-900 .dita-specialization-actions {
+  background-color: #37474f;
+  border-color: #455a64;
+}
+
+.dita-specialization-actions p {
+  color: #333;
+}
+
+.mdl-color--blue-grey-900 .dita-specialization-actions p {
+  color: #eceff1;
+}
