@@ -63,7 +63,7 @@ docker run --rm -p 8080:8080 -e OLLAMA_HOST=localhost -e OLLAMA_PORT=11434 quay.
 
 ## AsciiDocDITA Mode
 
-The app includes a special **DITA mode** for converting AsciiDoc files to DITA format with DITA-specific linting rules.
+The app includes a special **DITA mode** for converting AsciiDoc files to DITA format with DITA-specific linting rules, specialized DITA types, and automated cleanup.
 
 ### How to use
 
@@ -72,7 +72,9 @@ The app includes a special **DITA mode** for converting AsciiDoc files to DITA f
 3. **Fix any issues**: DITA mode uses strict DITA-specific rules from the [asciidoctor-dita-vale](https://github.com/jhradilek/asciidoctor-dita-vale) package
 4. **Convert to DITA**: Once your content has no errors or warnings, the "Convert to DITA" button appears
 5. **Get your DITA file**: 
-   - View the converted DITA XML in the modal
+   - With **Auto-convert enabled** (default): Automatically converts to specialized DITA (concept/reference/task) with type badge
+   - With **Auto-convert disabled**: Shows generic DITA with buttons to manually convert to concept, reference, or task
+   - View the DITA XML in the modal
    - Copy to clipboard or download the file
    - The filename is automatically extracted from your document's `id` attribute
 
@@ -80,6 +82,11 @@ The app includes a special **DITA mode** for converting AsciiDoc files to DITA f
 
 Access DITA conversion options from the Settings menu (gear icon) when in DITA mode:
 
+**Automation Settings** *(both enabled by default)*:
+- **Auto-convert to specialized DITA**: Automatically detect content type and convert to specialized DITA (concept/reference/task)
+- **Auto-cleanup DITA**: Automatically clean up DITA files after conversion using `dita-cleanup` utility
+
+**Conversion Options**:
 - **Enable author lines**: Process author lines as metadata instead of paragraphs
 - **Disable floating titles**: Don't convert floating titles (may lose content)
 - **Disable callouts**: Don't convert callout annotations (may lose content)
@@ -87,11 +94,14 @@ Access DITA conversion options from the Settings menu (gear icon) when in DITA m
 
 ### Technical Details
 
-- Uses `asciidoctor-dita-topic` gem for conversion
+- Uses `asciidoctor-dita-topic` gem for initial conversion to generic DITA
+- Uses `dita-convert` Python package to specialize DITA topics to concept, reference, or task
+- Uses `dita-cleanup` Python package to clean up generated DITA files
 - Applies DITA-specific Vale rules during linting
 - Mode preference is saved in your browser (localStorage)
 - Non-destructive: original AsciiDoc content remains unchanged
 - Supports custom DITA conversion options via Settings
+- Auto-detection of content type based on AsciiDoc metadata when available
 
 ## Using custom Vale configuration
 If you want to use a custom Vale configuration, you can mount a volume with the configuration file and specify the `VALE_INI_PATH` environment variable.

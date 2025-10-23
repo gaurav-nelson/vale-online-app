@@ -91,6 +91,120 @@ const runVale = (filePath, configFile = ".vale.ini") => {
   });
 };
 
+// Helper function to run dita-convert to detect type
+const runDitaDetectType = (ditaFilePath) => {
+  return new Promise((resolve, reject) => {
+    const args = ["-g", ditaFilePath];
+    const ditaConvert = spawn("dita-convert", args);
+    let output = "";
+    let errorOutput = "";
+
+    ditaConvert.stdout.on("data", (data) => {
+      output += data.toString();
+    });
+
+    ditaConvert.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    ditaConvert.on("error", (error) => {
+      log("Error running dita-convert detect:", error);
+      reject(error);
+    });
+
+    ditaConvert.on("close", (code) => {
+      if (code !== 0) {
+        log("dita-convert detect stderr:", errorOutput);
+        reject(new Error(`Type detection failed: ${errorOutput}`));
+      } else {
+        // Parse output to detect type from the specialized DITA
+        // The tool will output the specialized version, we need to detect the root element
+        const typeMatch = output.match(/<(concept|reference|task)\s/);
+        if (typeMatch && typeMatch[1]) {
+          resolve(typeMatch[1]);
+        } else {
+          resolve(null); // Auto-detection failed
+        }
+      }
+    });
+  });
+};
+
+// Helper function to run dita-convert to specialize to a specific type
+const runDitaSpecialize = (ditaFilePath, type, isGenerated = true) => {
+  return new Promise((resolve, reject) => {
+    const outputFile = `${ditaFilePath}.specialized`;
+    const args = ["-t", type];
+    
+    if (isGenerated) {
+      args.push("-g");
+    }
+    
+    args.push(ditaFilePath, "-o", outputFile);
+    
+    const ditaConvert = spawn("dita-convert", args);
+    let errorOutput = "";
+
+    ditaConvert.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    ditaConvert.on("error", (error) => {
+      log("Error running dita-convert specialize:", error);
+      reject(error);
+    });
+
+    ditaConvert.on("close", async (code) => {
+      if (code !== 0) {
+        log("dita-convert specialize stderr:", errorOutput);
+        reject(new Error(`Specialization failed: ${errorOutput}`));
+      } else {
+        try {
+          const specializedContent = await fs.promises.readFile(outputFile, "utf8");
+          await fs.promises.unlink(outputFile).catch(() => {});
+          resolve(specializedContent);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    });
+  });
+};
+
+// Helper function to run dita-cleanup
+const runDitaCleanup = (ditaFilePath) => {
+  return new Promise((resolve, reject) => {
+    // dita-cleanup modifies files in place, so we work with a copy
+    const args = ["-iI", ditaFilePath];
+    
+    const ditaCleanup = spawn("dita-cleanup", args);
+    let errorOutput = "";
+
+    ditaCleanup.stderr.on("data", (data) => {
+      errorOutput += data.toString();
+    });
+
+    ditaCleanup.on("error", (error) => {
+      log("Error running dita-cleanup:", error);
+      reject(error);
+    });
+
+    ditaCleanup.on("close", async (code) => {
+      if (code !== 0) {
+        log("dita-cleanup stderr:", errorOutput);
+        reject(new Error(`Cleanup failed: ${errorOutput}`));
+      } else {
+        try {
+          const cleanedContent = await fs.promises.readFile(ditaFilePath, "utf8");
+          resolve(cleanedContent);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    });
+  });
+};
+
 const checkInternet = async () => {
   try {
     await fetch("http://google.com", { method: "HEAD" });
@@ -258,13 +372,41 @@ app.post("/convert-to-dita", cors(corsOptions), async function (req, res) {
     });
     
     // Read the converted DITA content
-    const ditaContent = await fs.promises.readFile(tempOutputFile, "utf8");
+    let ditaContent = await fs.promises.readFile(tempOutputFile, "utf8");
+    let detectedType = null;
+    
+    // Check if auto-specialize is enabled
+    if (settings && settings.autoSpecialize) {
+      try {
+        // Try to detect type
+        detectedType = await runDitaDetectType(tempOutputFile);
+        
+        if (detectedType) {
+          log(`Auto-detected DITA type: ${detectedType}`);
+          // Specialize to detected type
+          ditaContent = await runDitaSpecialize(tempOutputFile, detectedType, true);
+        } else {
+          log("Could not auto-detect DITA type, returning generic DITA");
+        }
+        
+        // Run cleanup if enabled
+        if (settings.autoCleanup) {
+          // Write specialized content back to file for cleanup
+          await fs.promises.writeFile(tempOutputFile, ditaContent);
+          ditaContent = await runDitaCleanup(tempOutputFile);
+          log("DITA cleanup completed");
+        }
+      } catch (error) {
+        log("Error during auto-specialization or cleanup:", error);
+        // Continue with generic DITA if specialization fails
+      }
+    }
     
     // Clean up temporary files
     await fs.promises.unlink(tempInputFile).catch(() => {});
     await fs.promises.unlink(tempOutputFile).catch(() => {});
     
-    res.send({ ditaContent });
+    res.send({ ditaContent, detectedType });
   } catch (error) {
     // Clean up temporary files in case of error
     await fs.promises.unlink(tempInputFile).catch(() => {});
@@ -272,6 +414,79 @@ app.post("/convert-to-dita", cors(corsOptions), async function (req, res) {
     
     log("Error converting to DITA:", error);
     handleError(res, error, "Failed to convert AsciiDoc to DITA");
+  }
+});
+
+// POST /api/dita/detect-type - Detect DITA content type
+app.post("/api/dita/detect-type", cors(corsOptions), async function (req, res) {
+  const { ditaContent } = req.body;
+  
+  if (!ditaContent || typeof ditaContent !== "string") {
+    return res.status(400).send({ error: true, msg: "Missing or invalid ditaContent" });
+  }
+  
+  const tempFile = `temp-detect-${Date.now()}.dita`;
+  
+  try {
+    await fs.promises.writeFile(tempFile, ditaContent);
+    const detectedType = await runDitaDetectType(tempFile);
+    await fs.promises.unlink(tempFile).catch(() => {});
+    
+    res.send({ detectedType });
+  } catch (error) {
+    await fs.promises.unlink(tempFile).catch(() => {});
+    log("Error detecting DITA type:", error);
+    handleError(res, error, "Failed to detect DITA type");
+  }
+});
+
+// POST /api/dita/specialize - Specialize generic DITA to concept/reference/task
+app.post("/api/dita/specialize", cors(corsOptions), async function (req, res) {
+  const { ditaContent, type, isGenerated } = req.body;
+  
+  if (!ditaContent || typeof ditaContent !== "string") {
+    return res.status(400).send({ error: true, msg: "Missing or invalid ditaContent" });
+  }
+  
+  if (!type || !["concept", "reference", "task"].includes(type)) {
+    return res.status(400).send({ error: true, msg: "Invalid type. Must be concept, reference, or task" });
+  }
+  
+  const tempFile = `temp-specialize-${Date.now()}.dita`;
+  
+  try {
+    await fs.promises.writeFile(tempFile, ditaContent);
+    const specializedContent = await runDitaSpecialize(tempFile, type, isGenerated !== false);
+    await fs.promises.unlink(tempFile).catch(() => {});
+    
+    res.send({ specializedContent, type });
+  } catch (error) {
+    await fs.promises.unlink(tempFile).catch(() => {});
+    log("Error specializing DITA:", error);
+    handleError(res, error, "Failed to specialize DITA");
+  }
+});
+
+// POST /api/dita/cleanup - Clean up DITA content
+app.post("/api/dita/cleanup", cors(corsOptions), async function (req, res) {
+  const { ditaContent } = req.body;
+  
+  if (!ditaContent || typeof ditaContent !== "string") {
+    return res.status(400).send({ error: true, msg: "Missing or invalid ditaContent" });
+  }
+  
+  const tempFile = `temp-cleanup-${Date.now()}.dita`;
+  
+  try {
+    await fs.promises.writeFile(tempFile, ditaContent);
+    const cleanedContent = await runDitaCleanup(tempFile);
+    await fs.promises.unlink(tempFile).catch(() => {});
+    
+    res.send({ cleanedContent });
+  } catch (error) {
+    await fs.promises.unlink(tempFile).catch(() => {});
+    log("Error cleaning up DITA:", error);
+    handleError(res, error, "Failed to clean up DITA");
   }
 });
 

@@ -3,9 +3,13 @@
 // Global variable to track current Vale mode
 let currentValeMode = "standard"; // 'standard' or 'dita'
 let ditaConversionResult = null;
+let currentDitaType = null; // Track the current DITA type (concept/reference/task)
+let genericDitaContent = null; // Store generic DITA for manual specialization
 
 // Default DITA settings
 const defaultDitaSettings = {
+  autoSpecialize: true,
+  autoCleanup: true,
   enableAuthors: false,
   disableFloatingTitles: false,
   disableCallouts: false,
@@ -75,16 +79,23 @@ function loadDitaSettings() {
   const savedSettings = localStorage.getItem("ditaSettings");
   const settings = savedSettings ? JSON.parse(savedSettings) : defaultDitaSettings;
   
+  // Merge with defaults to ensure new settings are present
+  const mergedSettings = { ...defaultDitaSettings, ...settings };
+  
   // Update checkbox states
+  const autoSpecializeCheckbox = document.getElementById("ditaAutoSpecializeCheckbox");
+  const autoCleanupCheckbox = document.getElementById("ditaAutoCleanupCheckbox");
   const enableAuthorsCheckbox = document.getElementById("ditaEnableAuthorsCheckbox");
   const disableFloatingTitlesCheckbox = document.getElementById("ditaDisableFloatingTitlesCheckbox");
   const disableCalloutsCheckbox = document.getElementById("ditaDisableCalloutsCheckbox");
   const secureModeCheckbox = document.getElementById("ditaSecureModeCheckbox");
   
-  if (enableAuthorsCheckbox) enableAuthorsCheckbox.checked = settings.enableAuthors || false;
-  if (disableFloatingTitlesCheckbox) disableFloatingTitlesCheckbox.checked = settings.disableFloatingTitles || false;
-  if (disableCalloutsCheckbox) disableCalloutsCheckbox.checked = settings.disableCallouts || false;
-  if (secureModeCheckbox) secureModeCheckbox.checked = settings.secureMode || false;
+  if (autoSpecializeCheckbox) autoSpecializeCheckbox.checked = mergedSettings.autoSpecialize !== false;
+  if (autoCleanupCheckbox) autoCleanupCheckbox.checked = mergedSettings.autoCleanup !== false;
+  if (enableAuthorsCheckbox) enableAuthorsCheckbox.checked = mergedSettings.enableAuthors || false;
+  if (disableFloatingTitlesCheckbox) disableFloatingTitlesCheckbox.checked = mergedSettings.disableFloatingTitles || false;
+  if (disableCalloutsCheckbox) disableCalloutsCheckbox.checked = mergedSettings.disableCallouts || false;
+  if (secureModeCheckbox) secureModeCheckbox.checked = mergedSettings.secureMode !== false;
   
   // Upgrade MDL components if available
   if (typeof componentHandler !== "undefined") {
@@ -133,6 +144,8 @@ async function openConvertToDitaModal() {
   const loadingDiv = document.getElementById("dita-loading");
   const errorDiv = document.getElementById("dita-error");
   const outputContainer = document.getElementById("dita-output-container");
+  const specializationView = document.getElementById("dita-specialization-view");
+  const typeBadge = document.getElementById("dita-type-badge");
   
   // Show modal
   modal.style.display = "flex";
@@ -141,6 +154,10 @@ async function openConvertToDitaModal() {
   loadingDiv.style.display = "block";
   errorDiv.style.display = "none";
   outputContainer.style.display = "none";
+  specializationView.style.display = "none";
+  typeBadge.style.display = "none";
+  currentDitaType = null;
+  genericDitaContent = null;
   
   // Get AsciiDoc content from editor
   const asciidocContent = editor.getValue();
@@ -159,19 +176,33 @@ async function openConvertToDitaModal() {
     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Conversion failed");
+      throw new Error(errorData.msg || "Conversion failed");
     }
     
     const data = await response.json();
     ditaConversionResult = data.ditaContent;
+    currentDitaType = data.detectedType;
     
-    // Display DITA content
-    const ditaOutput = document.getElementById("dita-output");
-    ditaOutput.textContent = ditaConversionResult;
-    
-    // Show output, hide loading
     loadingDiv.style.display = "none";
-    outputContainer.style.display = "block";
+    
+    // Check if auto-specialize is enabled and was successful
+    if (settings.autoSpecialize && currentDitaType) {
+      // Show specialized DITA with type badge
+      const ditaOutput = document.getElementById("dita-output");
+      ditaOutput.textContent = ditaConversionResult;
+      outputContainer.style.display = "block";
+      
+      // Show type badge
+      typeBadge.textContent = currentDitaType;
+      typeBadge.className = `dita-type-badge ${currentDitaType}`;
+      typeBadge.style.display = "inline-block";
+    } else {
+      // Show generic DITA with specialization buttons
+      genericDitaContent = ditaConversionResult;
+      const ditaGenericOutput = document.getElementById("dita-generic-output");
+      ditaGenericOutput.textContent = ditaConversionResult;
+      specializationView.style.display = "block";
+    }
     
     // Initialize MDL components for new buttons
     if (typeof componentHandler !== "undefined") {
@@ -193,6 +224,8 @@ function closeDitaModal() {
   const modal = document.getElementById("dita-conversion-modal");
   modal.style.display = "none";
   ditaConversionResult = null;
+  currentDitaType = null;
+  genericDitaContent = null;
 }
 
 // Copy DITA content to clipboard
@@ -246,5 +279,105 @@ function downloadDitaFile() {
   URL.revokeObjectURL(url);
   
   showNotification(`DITA file downloaded as ${filename}!`);
+}
+
+// Handle specialization button click (concept/reference/task)
+async function handleSpecializationClick(type) {
+  if (!genericDitaContent) {
+    showNotification("No generic DITA content available");
+    return;
+  }
+  
+  const loadingDiv = document.getElementById("dita-loading");
+  const errorDiv = document.getElementById("dita-error");
+  const specializationView = document.getElementById("dita-specialization-view");
+  const outputContainer = document.getElementById("dita-output-container");
+  const typeBadge = document.getElementById("dita-type-badge");
+  
+  // Show loading
+  specializationView.style.display = "none";
+  loadingDiv.style.display = "block";
+  errorDiv.style.display = "none";
+  
+  try {
+    // Call specialize endpoint
+    const specializedContent = await specializeDita(genericDitaContent, type);
+    
+    // Check if cleanup is enabled
+    const settings = getDitaSettings();
+    let finalContent = specializedContent;
+    
+    if (settings.autoCleanup) {
+      finalContent = await cleanupDita(specializedContent);
+    }
+    
+    // Update display
+    ditaConversionResult = finalContent;
+    currentDitaType = type;
+    
+    const ditaOutput = document.getElementById("dita-output");
+    ditaOutput.textContent = finalContent;
+    
+    // Show type badge
+    typeBadge.textContent = type;
+    typeBadge.className = `dita-type-badge ${type}`;
+    typeBadge.style.display = "inline-block";
+    
+    // Show specialized output
+    loadingDiv.style.display = "none";
+    outputContainer.style.display = "block";
+    
+    showNotification(`Successfully converted to ${type.toUpperCase()}`);
+  } catch (error) {
+    console.error("Error specializing DITA:", error);
+    
+    loadingDiv.style.display = "none";
+    errorDiv.style.display = "block";
+    
+    const errorMessage = document.getElementById("dita-error-message");
+    errorMessage.textContent = `Specialization failed: ${error.message}`;
+  }
+}
+
+// Specialize DITA content to a specific type
+async function specializeDita(ditaContent, type) {
+  const response = await fetch("http://localhost:8080/api/dita/specialize", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      ditaContent, 
+      type,
+      isGenerated: true
+    }),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.msg || "Specialization failed");
+  }
+  
+  const data = await response.json();
+  return data.specializedContent;
+}
+
+// Clean up DITA content
+async function cleanupDita(ditaContent) {
+  const response = await fetch("http://localhost:8080/api/dita/cleanup", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ditaContent }),
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.msg || "Cleanup failed");
+  }
+  
+  const data = await response.json();
+  return data.cleanedContent;
 }
 
