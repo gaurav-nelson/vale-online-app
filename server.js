@@ -86,7 +86,21 @@ const runVale = (filePath, configFile = ".vale.ini") => {
     });
 
     valeLint.on("close", (code) => {
-      resolve(output);
+      // Ensure we always return valid JSON
+      if (!output || output.trim() === "") {
+        resolve("{}");
+      } else {
+        try {
+          // Validate that the output is valid JSON
+          JSON.parse(output);
+          resolve(output);
+        } catch (parseError) {
+          log("Vale output is not valid JSON:", output);
+          log("Parse error:", parseError);
+          // Return empty JSON object if parsing fails
+          resolve("{}");
+        }
+      }
     });
   });
 };
