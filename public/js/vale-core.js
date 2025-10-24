@@ -14,7 +14,22 @@ async function postData(url, data) {
     },
     body: data,
   });
-  return response.json();
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const text = await response.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Failed to parse JSON response:", text);
+    throw new Error("Invalid JSON response from server");
+  }
 }
 
 function sendRequest(adoc) {
