@@ -193,18 +193,36 @@ function applyIssueFilter(filterValue) {
 
 async function fixSelectedIssues() {
   const checkboxes = document.querySelectorAll('.issue-item input[type="checkbox"]');
-  selectedIssuesList = [];
+  const selectedIssues = [];
   
   checkboxes.forEach((cb, index) => {
     if (cb.checked) {
-      selectedIssuesList.push({ issue: allIssues[index], index: index });
+      selectedIssues.push(allIssues[index]);
     }
   });
   
-  if (selectedIssuesList.length === 0) {
+  if (selectedIssues.length === 0) {
     showNotification("Please select at least one issue to fix");
     return;
   }
+  
+  // Group issues by line number
+  const issuesByLine = {};
+  selectedIssues.forEach(issue => {
+    const lineNum = issue.Line;
+    if (!issuesByLine[lineNum]) {
+      issuesByLine[lineNum] = [];
+    }
+    issuesByLine[lineNum].push(issue);
+  });
+  
+  // Convert to array of groups, sorted by line number
+  selectedIssuesList = Object.keys(issuesByLine)
+    .sort((a, b) => parseInt(a) - parseInt(b))
+    .map(lineNum => ({
+      lineNumber: parseInt(lineNum),
+      issues: issuesByLine[lineNum]
+    }));
   
   // Reset approval state
   currentIssueIndex = 0;
@@ -216,7 +234,7 @@ async function fixSelectedIssues() {
   document.getElementById("issue-selection-view").style.display = "none";
   document.getElementById("fix-issues-btn").style.display = "none";
   
-  // Process first issue
+  // Process first issue group
   processCurrentIssue();
 }
 

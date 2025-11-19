@@ -257,14 +257,21 @@ app.get("/api/ollama/models", cors(corsOptions), async function (req, res) {
 });
 
 app.post("/api/ollama/fix", cors(corsOptions), async function (req, res) {
-  const { paragraph, issue, problematicText, model, additionalContext } = req.body;
+  const { paragraph, issues, model, additionalContext } = req.body;
 
-  if (!paragraph || !issue || !model) {
+  if (!paragraph || !issues || !model) {
     return res.status(400).send({ error: true, msg: "Missing required parameters" });
   }
 
+  // Ensure issues is an array
+  const issuesArray = Array.isArray(issues) ? issues : [issues];
+
+  if (issuesArray.length === 0) {
+    return res.status(400).send({ error: true, msg: "At least one issue is required" });
+  }
+
   try {
-    const prompt = createFixPrompt(paragraph, issue, problematicText, additionalContext);
+    const prompt = createFixPrompt(paragraph, issuesArray, additionalContext);
 
     const ollamaResponse = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
       method: "POST",

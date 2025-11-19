@@ -43,19 +43,22 @@ async function processCurrentIssue() {
     return;
   }
   
-  const { issue } = selectedIssuesList[currentIssueIndex];
-  currentIssue = issue;
+  const currentGroup = selectedIssuesList[currentIssueIndex];
+  const lineNumber = currentGroup.lineNumber;
+  const issues = currentGroup.issues;
+  currentIssues = issues; // Store current issues for approval/skip logic
   
   // Show loading
   document.getElementById("approval-view").style.display = "none";
   document.getElementById("ai-fix-loading").style.display = "block";
+  const issueCount = issues.length;
+  const issueText = issueCount === 1 ? "issue" : "issues";
   document.getElementById("ai-fix-status").textContent = 
-    `Getting AI suggestion for issue ${currentIssueIndex + 1} of ${selectedIssuesList.length} using ${selectedModel}...`;
+    `Getting AI suggestion for ${issueCount} ${issueText} on line ${lineNumber} (${currentIssueIndex + 1} of ${selectedIssuesList.length} lines) using ${selectedModel}...`;
   
   try {
     const editorText = editor.getValue();
-    const paragraph = extractParagraph(editorText, issue.Line - 1);
-    const problematicText = extractProblematicText(editorText, issue);
+    const paragraph = extractParagraph(editorText, lineNumber - 1);
     
     currentOriginalText = paragraph;
     
@@ -66,15 +69,16 @@ async function processCurrentIssue() {
       },
       body: JSON.stringify({
         paragraph: paragraph,
-        issue: issue,
-        problematicText: problematicText,
+        issues: issues,
         model: selectedModel,
       }),
     });
     
     if (!response.ok) {
-      failedIssues.push({ issue, error: "API request failed" });
-      showNotification(`Failed to get AI suggestion for issue ${currentIssueIndex + 1}`);
+      issues.forEach(issue => {
+        failedIssues.push({ issue, error: "API request failed" });
+      });
+      showNotification(`Failed to get AI suggestion for ${issueCount} ${issueText} on line ${lineNumber}`);
       currentIssueIndex++;
       processCurrentIssue();
       return;
@@ -84,18 +88,20 @@ async function processCurrentIssue() {
     currentFixedText = cleanAIOutput(paragraph, data.fixedText);
     
     // Show approval view
-    showApprovalView(issue, paragraph, currentFixedText);
+    showApprovalView(issues, lineNumber, paragraph, currentFixedText);
     
   } catch (error) {
-    console.error(`Error processing issue ${currentIssueIndex + 1}:`, error);
-    failedIssues.push({ issue, error: error.message });
-    showNotification(`Error processing issue ${currentIssueIndex + 1}`);
+    console.error(`Error processing line ${lineNumber}:`, error);
+    issues.forEach(issue => {
+      failedIssues.push({ issue, error: error.message });
+    });
+    showNotification(`Error processing ${issueCount} ${issueText} on line ${lineNumber}`);
     currentIssueIndex++;
     processCurrentIssue();
   }
 }
 
-function showApprovalView(issue, originalText, suggestedText) {
+function showApprovalView(issues, lineNumber, originalText, suggestedText) {
   // Hide loading
   document.getElementById("ai-fix-loading").style.display = "none";
   
@@ -104,19 +110,60 @@ function showApprovalView(issue, originalText, suggestedText) {
   approvalView.style.display = "block";
   
   // Update progress
+  const issueCount = issues.length;
+  const issueText = issueCount === 1 ? "issue" : "issues";
   document.getElementById("approval-progress-text").textContent = 
-    `Issue ${currentIssueIndex + 1} of ${selectedIssuesList.length}`;
+    `Fixing ${issueCount} ${issueText} on line ${lineNumber} (${currentIssueIndex + 1} of ${selectedIssuesList.length} lines)`;
   
-  // Update issue details
-  const severitySpan = document.getElementById("approval-severity");
-  severitySpan.className = `issue-severity ${issue.Severity}`;
-  severitySpan.textContent = issue.Severity.toUpperCase();
+  // Clear and rebuild the issue details container
+  const issueDetailsContainer = document.getElementById("approval-issue-details");
   
-  document.getElementById("approval-line").textContent = 
-    `Line ${issue.Line} (${issue.Span[0]}-${issue.Span[1]})`;
-  
-  document.getElementById("approval-check").textContent = issue.Check;
-  document.getElementById("approval-message").textContent = issue.Message;
+  if (issueDetailsContainer) {
+    // Clear all existing content
+    issueDetailsContainer.innerHTML = "";
+    
+    // Create fresh container for issues list
+    const issuesListContainer = document.createElement("div");
+    issuesListContainer.id = "approval-issues-list";
+    issuesListContainer.className = "approval-issues-list";
+    issueDetailsContainer.appendChild(issuesListContainer);
+    
+    // Now populate it with issues
+    issues.forEach((issue, index) => {
+      const issueItem = document.createElement("div");
+      issueItem.className = "approval-issue-item";
+      
+      const severitySpan = document.createElement("span");
+      severitySpan.className = `issue-severity ${issue.Severity}`;
+      severitySpan.textContent = issue.Severity.toUpperCase();
+      
+      const spanInfo = document.createElement("div");
+      spanInfo.className = "issue-line";
+      spanInfo.textContent = `Line ${lineNumber} (${issue.Span[0]}-${issue.Span[1]})`;
+      
+      const checkDiv = document.createElement("div");
+      checkDiv.className = "issue-check";
+      checkDiv.textContent = issue.Check;
+      
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "issue-message";
+      messageDiv.textContent = issue.Message;
+      
+      issueItem.appendChild(severitySpan);
+      issueItem.appendChild(spanInfo);
+      issueItem.appendChild(checkDiv);
+      issueItem.appendChild(messageDiv);
+      
+      issuesListContainer.appendChild(issueItem);
+      
+      // Add separator between issues (except for the last one)
+      if (index < issues.length - 1) {
+        const separator = document.createElement("hr");
+        separator.className = "approval-issue-separator";
+        issuesListContainer.appendChild(separator);
+      }
+    });
+  }
   
   // Populate model dropdown
   const modelSelect = document.getElementById('approval-model-select');
@@ -129,6 +176,24 @@ function showApprovalView(issue, originalText, suggestedText) {
       option.selected = true;
     }
     modelSelect.appendChild(option);
+  });
+  
+  // Add event listener to sync model changes globally
+  // Remove old listener first to avoid duplicates
+  const newModelSelect = modelSelect.cloneNode(true);
+  modelSelect.parentNode.replaceChild(newModelSelect, modelSelect);
+  newModelSelect.addEventListener('change', function() {
+    // Update global selected model
+    selectedModel = this.value;
+    localStorage.setItem("ollamaModel", selectedModel);
+    
+    // Update the settings dropdown if it exists
+    const settingsModelSelect = document.getElementById('ollamaModelSelect');
+    if (settingsModelSelect) {
+      settingsModelSelect.value = selectedModel;
+    }
+    
+    console.log('Model changed to:', selectedModel);
   });
   
   // Reset context input
@@ -247,7 +312,7 @@ function escapeHtml(text) {
 
 function approveCurrentFix() {
   approvedFixes.push({
-    issue: currentIssue,
+    issues: currentIssues,
     originalText: currentOriginalText,
     fixedText: currentFixedText,
   });
@@ -257,26 +322,33 @@ function approveCurrentFix() {
 }
 
 function skipCurrentFix() {
-  skippedIssues.push(currentIssue);
+  currentIssues.forEach(issue => {
+    skippedIssues.push(issue);
+  });
   currentIssueIndex++;
   processCurrentIssue();
 }
 
 async function retryCurrentFix() {
-  // Re-process the current issue without incrementing index
+  // Re-process the current issue group without incrementing index
   document.getElementById("approval-view").style.display = "none";
   document.getElementById("ai-fix-loading").style.display = "block";
   
   // Get selected model from dropdown
   const modelFromDropdown = document.getElementById('approval-model-select').value;
   
+  const currentGroup = selectedIssuesList[currentIssueIndex];
+  const lineNumber = currentGroup.lineNumber;
+  const issues = currentGroup.issues;
+  const issueCount = issues.length;
+  const issueText = issueCount === 1 ? "issue" : "issues";
+  
   document.getElementById("ai-fix-status").textContent = 
-    `Retrying AI suggestion for issue ${currentIssueIndex + 1} of ${selectedIssuesList.length} using ${modelFromDropdown}...`;
+    `Retrying AI suggestion for ${issueCount} ${issueText} on line ${lineNumber} using ${modelFromDropdown}...`;
   
   try {
     const editorText = editor.getValue();
-    const paragraph = extractParagraph(editorText, currentIssue.Line - 1);
-    const problematicText = extractProblematicText(editorText, currentIssue);
+    const paragraph = extractParagraph(editorText, lineNumber - 1);
     
     // Get additional context if provided
     let additionalContext = '';
@@ -291,28 +363,27 @@ async function retryCurrentFix() {
       },
       body: JSON.stringify({
         paragraph: paragraph,
-        issue: currentIssue,
-        problematicText: problematicText,
+        issues: issues,
         model: modelFromDropdown,
         additionalContext: additionalContext,
       }),
     });
     
     if (!response.ok) {
-      showNotification("Retry failed. Please try again or skip this issue.");
-      showApprovalView(currentIssue, currentOriginalText, currentFixedText);
+      showNotification("Retry failed. Please try again or skip this line.");
+      showApprovalView(issues, lineNumber, currentOriginalText, currentFixedText);
       return;
     }
     
     const data = await response.json();
     currentFixedText = cleanAIOutput(currentOriginalText, data.fixedText);
     
-    showApprovalView(currentIssue, currentOriginalText, currentFixedText);
+    showApprovalView(issues, lineNumber, currentOriginalText, currentFixedText);
     
   } catch (error) {
     console.error("Error retrying fix:", error);
-    showNotification("Retry failed. Please try again or skip this issue.");
-    showApprovalView(currentIssue, currentOriginalText, currentFixedText);
+    showNotification("Retry failed. Please try again or skip this line.");
+    showApprovalView(issues, lineNumber, currentOriginalText, currentFixedText);
   }
 }
 
