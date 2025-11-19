@@ -59,6 +59,14 @@ async function loadOllamaModels() {
 function saveSelectedModel(selectElement) {
   selectedModel = selectElement.value;
   localStorage.setItem("ollamaModel", selectedModel);
+  
+  // Also update the approval modal dropdown if it exists
+  const approvalModelSelect = document.getElementById('approval-model-select');
+  if (approvalModelSelect) {
+    approvalModelSelect.value = selectedModel;
+  }
+  
+  console.log('Model changed to:', selectedModel);
 }
 
 function updateAIFixButtonVisibility() {

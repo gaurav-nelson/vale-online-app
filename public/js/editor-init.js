@@ -20,7 +20,8 @@ var selectedIssuesList = [];
 var approvedFixes = [];
 var skippedIssues = [];
 var failedIssues = [];
-var currentIssue = null;
+var currentIssue = null; // Deprecated - kept for backward compatibility
+var currentIssues = []; // Array of issues for the current line being processed
 var currentOriginalText = null;
 var currentFixedText = null;
 
