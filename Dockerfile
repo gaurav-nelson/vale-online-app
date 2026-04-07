@@ -1,5 +1,5 @@
-# Stage 1: Build stage
-FROM node:22-alpine AS build
+# Stage 1: Build stage (Node 24 LTS, Alpine 3.23)
+FROM node:24-alpine AS build
 
 WORKDIR /usr/src/app
 
@@ -9,14 +9,12 @@ RUN npm ci --omit=dev
 
 COPY . ./
 
-FROM alpine:3.20
+# Runtime: same Node as build; Alpine repos already include community (vale)
+FROM node:24-alpine
 
-RUN echo http://dl-cdn.alpinelinux.org/alpine/edge/community >>/etc/apk/repositories
-
-# gem install uri is a vulnerability fix
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache asciidoctor vale nodejs python3 py3-pip && \
+    apk add --no-cache asciidoctor vale python3 py3-pip && \
     rm -rf /var/cache/apk/* && \
     gem install uri asciidoctor-dita-topic && \
     pip3 install --no-cache-dir --break-system-packages dita-convert dita-cleanup
