@@ -1,3 +1,9 @@
+<table>
+<td align="center" width="5000" style="border:1px solid #ddd;padding:12px;">
+    <strong>NOTE:</strong> This app has been replaced by ProseLint Web. A more powerful, fully private, browser-based Vale linting editor with style guides, custom rules. <br>https://proselintweb.com/
+</td>
+</table>
+
 ![Demo](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYThucGZlZncwbGE0dGN6MW4yZmt3dTJ2YWRreHp2MW50amJ1ZTBrayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/v8twgFNMaK511l844i/source.gif)
 
 # Vale at Red Hat online app
